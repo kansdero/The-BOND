@@ -282,6 +282,32 @@ nav{display:flex;gap:4px;}
   </div>
 </div>
 
+<!-- FIRST-TIME SETUP MODAL -->
+<div class="pwd-reset-overlay" id="firstTimeSetupModal">
+  <div class="pwd-reset-box">
+    <div class="pwd-reset-title">Welcome! Set Your Credentials</div>
+    <div class="pwd-reset-subtitle">Create your personal code name and password for future logins</div>
+    <div class="pwd-reset-form">
+      <div class="form-group">
+        <label class="form-label">New Code Name (Username)</label>
+        <input type="text" id="setupCodeName" class="form-input" placeholder="e.g. john_doe, JD1" autocomplete="off" maxlength="30"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">New Password</label>
+        <input type="password" id="setupPassword" class="form-input" placeholder="••••" autocomplete="off"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Confirm Password</label>
+        <input type="password" id="setupConfirmPassword" class="form-input" placeholder="••••" autocomplete="off"/>
+      </div>
+      <div id="setupError" style="color:#ef4444;font-size:.8rem;margin-top:12px;"></div>
+      <div class="pwd-reset-actions">
+        <button class="btn-next-pwd" style="flex:1;" onclick="completeFirstTimeSetup()">Create Account</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- PASSWORD RESET MODAL -->
 <div class="pwd-reset-overlay" id="pwdResetModal">
   <div class="pwd-reset-box">
@@ -540,9 +566,65 @@ function handleLogin(){
     errorEl.textContent='Invalid username or password';return;
   }
 
-  currentUser={username,fullName,role:user.role,phone:user.phone};
+  // Check if user has already done first-time setup
+  const usersSetup=JSON.parse(localStorage.getItem('phUsersSetup')||'{}');
+  
+  if(!usersSetup[username]){
+    // First time login - show setup modal
+    currentUser={tempUsername:username,fullName:fullName,role:user.role,phone:user.phone};
+    sessionStorage.setItem('phTempUser',JSON.stringify(currentUser));
+    document.getElementById('loginOverlay').style.display='none';
+    document.getElementById('firstTimeSetupModal').classList.add('open');
+  }else{
+    // Already set up - proceed to app
+    currentUser={username:usersSetup[username].codeName,fullName:fullName,role:user.role,phone:user.phone};
+    sessionStorage.setItem('phCurrentUser',JSON.stringify(currentUser));
+    initApp();
+  }
+}
+
+function completeFirstTimeSetup(){
+  const codeName=document.getElementById('setupCodeName').value.trim().toLowerCase();
+  const password=document.getElementById('setupPassword').value.trim();
+  const confirmPassword=document.getElementById('setupConfirmPassword').value.trim();
+  const errorEl=document.getElementById('setupError');
+  errorEl.textContent='';
+
+  if(!codeName||!password||!confirmPassword){
+    errorEl.textContent='All fields are required';return;
+  }
+
+  if(password!==confirmPassword){
+    errorEl.textContent='Passwords do not match';return;
+  }
+
+  if(password.length<4){
+    errorEl.textContent='Password must be at least 4 characters';return;
+  }
+
+  if(codeName.length<3){
+    errorEl.textContent='Code name must be at least 3 characters';return;
+  }
+
+  const tempUser=JSON.parse(sessionStorage.getItem('phTempUser'));
+  if(!tempUser){
+    errorEl.textContent='Session expired. Please login again.';return;
+  }
+
+  // Save setup credentials
+  const usersSetup=JSON.parse(localStorage.getItem('phUsersSetup')||'{}');
+  usersSetup[tempUser.tempUsername]={codeName,password};
+  localStorage.setItem('phUsersSetup',JSON.stringify(usersSetup));
+
+  // Create current user session
+  currentUser={username:codeName,fullName:tempUser.fullName,role:tempUser.role,phone:tempUser.phone};
+  sessionStorage.removeItem('phTempUser');
   sessionStorage.setItem('phCurrentUser',JSON.stringify(currentUser));
-  initApp();
+
+  // Close modal and init app
+  document.getElementById('firstTimeSetupModal').classList.remove('open');
+  showToast('Account created successfully!');
+  setTimeout(initApp,500);
 }
 
 function handleLogout(){
@@ -562,6 +644,7 @@ function initAuth(){
 
 function initApp(){
   document.getElementById('loginOverlay').style.display='none';
+  document.getElementById('firstTimeSetupModal').classList.remove('open');
   document.getElementById('siteHeader').style.display='block';
   document.getElementById('userBar').style.display='flex';
   document.getElementById('userFullName').textContent=currentUser.fullName;
@@ -577,6 +660,7 @@ function initApp(){
   initZoneChips();
   renderZonesGrid();
   renderAgentsList();
+  renderAll();
 }
 
 function openPasswordReset(){
@@ -745,78 +829,4 @@ function renderAgentsList(){
       </div>
       <div class="agent-row-col">
         <div class="agent-row-label">Code Name</div>
-        <div class="agent-row-value">${esc(a.codeName)}</div>
-      </div>
-      <div class="agent-row-col">
-        <div class="agent-row-label">Phone</div>
-        <div class="agent-row-value">${esc(a.phone)}</div>
-      </div>
-      <div class="agent-row-actions">
-        <button class="btn-del-agent" onclick="deleteAgentAdmin('${a.id}')" ${currentUser.role!=='admin'?'disabled':''}}>Delete</button>
-      </div>
-    </div>`).join('');
-}
-
-/* ── PERSISTENT ROSTER ─────────────────────────────────── */
-function loadRoster(){
-  const agents=loadAgentsDB();
-  return agents.map(a=>({id:a.id,fullName:a.fullName,codename:a.codeName,phone:a.phone}));
-}
-
-function openRoster(){document.getElementById('rosterModal').classList.add('open');renderRoster();}
-function closeRoster(){document.getElementById('rosterModal').classList.remove('open');}
-
-function renderRoster(){
-  const q=(document.getElementById('rosterSearch').value||'').toLowerCase();
-  const roster=loadRoster();
-  const filtered=q?roster.filter(a=>a.codename.toLowerCase().includes(q)||(a.phone||'').includes(q)):roster;
-  const list=document.getElementById('rosterList');
-  if(!filtered.length){list.innerHTML='<div class="roster-empty">No agents in roster yet.</div>';return;}
-  list.innerHTML=filtered.map(a=>`
-    <div class="roster-item">
-      <div>
-        <div class="roster-item-name">${esc(sentenceCase(a.codename))}</div>
-        <div class="roster-item-phone">${esc(a.phone||'—')}</div>
-      </div>
-      <div class="roster-item-actions">
-        <button class="btn-roster-add" onclick="addToPoolFromRoster('${a.id}')">Add to Pool</button>
-      </div>
-    </div>`).join('');
-}
-
-function addToPoolFromRoster(rid){
-  const roster=loadRoster();
-  const ra=roster.find(a=>a.id===rid);if(!ra)return;
-  const allActive=Object.values(za).flat();
-  if(allActive.includes(ra.id)){showToast('Already in session');return;}
-  agents[ra.id]={id:ra.id,codename:ra.codename,phone:ra.phone};
-  za.pool.push(ra.id);
-  renderAll();
-  showToast(sentenceCase(ra.codename)+' added to pool');
-}
-
-/* ── EVENT TYPE ────────────────────────────────────────── */
-let eventType='Sunday Service';
-function setEventType(btn){
-  document.querySelectorAll('.event-type-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  eventType=btn.dataset.val;
-  const inp=document.getElementById('eventNameInput');
-  eventType==='event'?inp.classList.add('show'):inp.classList.remove('show');
-}
-function getEventLabel(){
-  if(eventType==='event'){const v=document.getElementById('eventNameInput').value.trim();return v||'Event';}
-  return eventType;
-}
-
-/* ── ZONE MANAGEMENT ───────────────────────────────────── */
-const DEFAULT_ZONES=['LAKESIDE','HAVEN','DUCATI','TALLY','SUPPORT'];
-let activeZones=[...DEFAULT_ZONES];
-
-function initZoneChips(){
-  const c=document.getElementById('zoneChips');c.innerHTML='';
-  DEFAULT_ZONES.forEach(z=>{
-    const chip=document.createElement('div');
-    chip.className='zone-chip active';chip.dataset.zone=z;
-    chip.textContent=z.charAt(0)+z.slice(1).toLowerCase();
-    chip.onclick=()=>toggleZone(chip,z
+        <div class="
