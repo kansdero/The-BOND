@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DEPLOYMENT</title>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --green:#5a9e1a;--green-dark:#4a8a12;--green-bg:#e8f5d0;--green-mid:#b8d880;
+  --orange:#f59e0b;--orange-dark:#d97706;
+  --white:#ffffff;--gray-100:#f3f4f6;--gray-200:#e5e7eb;--gray-300:#d1d5db;
+  --gray-400:#9ca3af;--text:#1f2937;--text-muted:#6b7280;
+  --red:#dc2626;--red-bg:#fee2e2;
+}
+body{font-family:'Quicksand',sans-serif;}
+</style>
+</head>
+<body>
+<h2>DEPLOYMENT</h2>
+
+<!-- Agent Form -->
+<form id="agentForm">
+  <input type="text" id="fullname" placeholder="Full Name" required />
+  <input type="text" id="codename" placeholder="Code Name" required />
+  <input type="text" id="contact" placeholder="Contact" required />
+  <button type="submit">Add Agent</button>
+</form>
+
+<!-- Field Toggle -->
+<div style="margin-top:10px">
+<label><input type="checkbox" id="toggleFull"> Full Name</label>
+<label><input type="checkbox" id="toggleCode" checked> Code Name</label>
+<label><input type="checkbox" id="toggleContact" checked> Contact</label>
+</div>
+
+<!-- Preview -->
+<div id="preview" style="margin-top:20px"></div>
+
+<script>
+function saveAgent(e){
+  e.preventDefault();
+  const agents = JSON.parse(localStorage.getItem('bondAgents')||'[]');
+  agents.push({
+    id:Date.now(),
+    fullname:document.getElementById('fullname').value,
+    codename:document.getElementById('codename').value,
+    contact:document.getElementById('contact').value
+  });
+  localStorage.setItem('bondAgents',JSON.stringify(agents));
+  renderAgents();
+}
+
+document.getElementById('agentForm').addEventListener('submit',saveAgent);
+
+document.querySelectorAll('#toggleFull,#toggleCode,#toggleContact').forEach(cb=>cb.addEventListener('change',renderAgents));
+
+function renderAgents(){
+  const agents = JSON.parse(localStorage.getItem('bondAgents')||'[]');
+  const showFull = document.getElementById('toggleFull').checked;
+  const showCode = document.getElementById('toggleCode').checked;
+  const showContact = document.getElementById('toggleContact').checked;
+
+  const html = agents.map(a=>{
+    let parts=[];
+    if(showFull) parts.push(a.fullname);
+    if(showCode) parts.push(a.codename);
+    if(showContact) parts.push(a.contact);
+    return parts.join(' | ');
+  }).join('<br/>');
+
+  document.getElementById('preview').innerHTML = html;
+}
+
+renderAgents();
+</script>
+
+</body>
+</html>
