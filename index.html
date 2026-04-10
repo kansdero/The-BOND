@@ -1,1612 +1,234 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>BOND Space — Phaneroo Ministries</title>
-<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-<!-- docx library for Word doc generation -->
-<script src="https://unpkg.com/docx@8.5.0/build/index.js"></script>
+<meta charset="UTF-8">
+<title>BOND Space</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <style>
-:root{
-  --green:#5a9e1a;--green-dark:#4a8a12;--green-bg:#e8f5d0;--green-mid:#b8d880;
-  --orange:#d4700a;--orange-dark:#b85e08;
-  --white:#ffffff;--gray-100:#f3f4f6;--gray-200:#e5e7eb;--gray-300:#d1d5db;
-  --gray-400:#9ca3af;--text:#1f2937;--text-muted:#6b7280;
-  --red:#dc2626;--red-bg:#fee2e2;
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-html{scroll-behavior:smooth;}
-body{font-family:'Quicksand',sans-serif;background:#fff;color:var(--text);min-height:100vh;}
-
-/* ── HEADER ──────────────────────────────────────────────── */
-.site-header{background:#fff;border-bottom:2px solid var(--green);position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.06);}
-.header-inner{max-width:1280px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:68px;}
-.logo-wrap{display:flex;align-items:center;gap:12px;cursor:pointer;}
-.logo-img-circle{width:44px;height:44px;border-radius:50%;overflow:hidden;object-fit:cover;background:#000;flex-shrink:0;cursor:pointer;border:2px solid var(--green-mid);transition:border-color .2s;}
-.logo-img-circle:hover{border-color:var(--green);}
-.logo-text-wrap{display:flex;flex-direction:column;line-height:1;}
-.logo-name{font-size:1.15rem;font-weight:700;color:var(--text);}
-.logo-tagline{font-size:.6rem;color:var(--green-dark);letter-spacing:3px;text-transform:uppercase;margin-top:3px;}
-nav{display:flex;gap:4px;}
-.nav-btn{background:none;border:none;cursor:pointer;font-family:'Quicksand',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);padding:8px 18px;border-radius:6px;transition:all .2s;}
-.nav-btn:hover{color:var(--orange);background:var(--gray-100);}
-.nav-btn.active{color:var(--orange);}
-
-/* ── PAGES ───────────────────────────────────────────────── */
-.page{display:none;}.page.active{display:block;}
-
-/* ── ABOUT PAGE ──────────────────────────────────────────── */
-.about-page{max-width:860px;margin:0 auto;padding:48px 24px 80px;}
-.about-hero{text-align:center;padding:40px 0 48px;border-bottom:2px solid var(--green-bg);margin-bottom:48px;}
-.about-logo-big{width:80px;height:80px;border-radius:50%;object-fit:cover;background:#000;margin:0 auto 20px;display:block;}
-.about-ministry-name{font-size:2rem;font-weight:700;color:var(--text);line-height:1.15;margin-bottom:8px;}
-.about-ministry-name span{color:var(--orange);}
-.about-tagline{font-size:.72rem;letter-spacing:4px;text-transform:uppercase;color:var(--green-dark);margin-bottom:18px;}
-.about-intro{max-width:580px;margin:0 auto;font-size:.95rem;line-height:1.8;color:var(--text-muted);}
-.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:24px;}
-.about-card{background:var(--green-bg);border:1.5px solid var(--green-mid);border-radius:12px;padding:26px;position:relative;overflow:hidden;}
-.about-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--orange);}
-.card-label{font-size:.78rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--orange);margin-bottom:6px;}
-.card-title{font-size:.95rem;font-weight:600;color:var(--text);margin-bottom:10px;}
-.card-body{font-size:.86rem;line-height:1.75;color:var(--text);}
-.about-full-card{background:var(--green-bg);border:1.5px solid var(--green-mid);border-radius:12px;padding:28px;margin-bottom:20px;position:relative;overflow:hidden;}
-.about-full-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--orange);}
-.full-card-header{display:flex;align-items:center;gap:12px;margin-bottom:18px;}
-.full-card-title{font-size:1.1rem;font-weight:700;color:var(--orange);}
-.full-card-sub{font-size:.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--green-dark);margin-top:2px;}
-.info-row{display:grid;grid-template-columns:145px 1fr;gap:10px;padding:11px 0;border-bottom:1px solid var(--green-mid);font-size:.88rem;}
-.info-row:last-child{border-bottom:none;}
-.info-label{font-size:.85rem;font-weight:700;color:var(--text);padding-top:1px;}
-.info-value{color:var(--text);line-height:1.6;}
-.info-value a{color:var(--text);text-decoration:underline;}
-.values-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;}
-.value-pill{background:rgba(255,255,255,.5);border:1px solid var(--green-mid);border-radius:20px;padding:3px 13px;font-size:.75rem;color:var(--text);}
-
-/* ── CONFIGURE PAGE ──────────────────────────────────────── */
-.config-page{max-width:900px;margin:0 auto;padding:40px 24px 80px;}
-.config-page h2{font-size:1.4rem;font-weight:700;color:var(--text);margin-bottom:6px;}
-.config-page .config-sub{font-size:.85rem;color:var(--text-muted);margin-bottom:32px;}
-.config-section{background:#fff;border:1.5px solid var(--gray-200);border-radius:14px;padding:24px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,.04);}
-.config-section-title{font-size:.65rem;letter-spacing:3px;text-transform:uppercase;color:var(--orange);font-weight:700;margin-bottom:16px;}
-.config-fields{display:flex;flex-wrap:wrap;gap:16px;}
-.config-field{display:flex;flex-direction:column;gap:5px;flex:1;min-width:160px;}
-.config-field label{font-size:.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);font-weight:700;}
-.config-input{background:var(--white);border:1.5px solid var(--gray-300);color:var(--text);padding:9px 12px;border-radius:8px;font-family:'Quicksand',sans-serif;font-size:.88rem;width:100%;}
-.config-input:focus{outline:none;border-color:var(--green);}
-.svc-type-btns{display:flex;gap:6px;flex-wrap:wrap;}
-.svc-btn{padding:8px 16px;border-radius:8px;border:1.5px solid var(--gray-300);background:var(--white);font-family:'Quicksand',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;color:var(--text-muted);transition:all .18s;}
-.svc-btn.active{background:var(--orange);border-color:var(--orange);color:#fff;}
-.event-name-wrap{display:none;margin-top:10px;}
-.event-name-wrap.show{display:block;}
-.zone-picker{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;}
-.zone-pick-chip{display:flex;align-items:center;gap:5px;padding:6px 14px;border-radius:20px;border:1.5px solid var(--gray-300);background:var(--white);font-family:'Quicksand',sans-serif;font-size:.75rem;font-weight:700;cursor:pointer;transition:all .18s;color:var(--text-muted);user-select:none;}
-.zone-pick-chip.active{background:var(--green-bg);border-color:var(--green);color:var(--green-dark);}
-.zone-pick-chip .chip-x{font-size:.9rem;color:var(--red);margin-left:2px;display:none;}
-.zone-pick-chip.custom .chip-x{display:inline;}
-.zone-add-row{display:flex;gap:8px;align-items:center;margin-top:10px;}
-.zone-add-input{padding:7px 12px;border-radius:8px;border:1.5px solid var(--gray-300);font-family:'Quicksand',sans-serif;font-size:.82rem;width:160px;}
-.zone-add-input:focus{outline:none;border-color:var(--green);}
-.zone-add-btn{padding:7px 14px;border-radius:8px;border:none;background:var(--green);color:#fff;font-family:'Quicksand',sans-serif;font-size:.75rem;font-weight:700;cursor:pointer;}
-.config-proceed-btn{width:100%;padding:14px;border-radius:10px;border:none;background:var(--green);color:#fff;font-family:'Quicksand',sans-serif;font-size:.88rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:8px;transition:background .2s;}
-.config-proceed-btn:hover{background:var(--green-dark);}
-
-/* ── DEPLOY PAGE ─────────────────────────────────────────── */
-.deploy-page{max-width:1280px;margin:0 auto;padding:20px 20px 80px;}
-.deploy-config-strip{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--gray-100);border-radius:10px;padding:10px 16px;margin-bottom:18px;font-size:.78rem;}
-.strip-item{display:flex;flex-direction:column;gap:1px;}
-.strip-lbl{font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);font-weight:700;}
-.strip-val{font-weight:700;color:var(--text);}
-.strip-edit-btn{margin-left:auto;padding:6px 14px;border-radius:7px;border:1.5px solid var(--gray-300);background:var(--white);font-family:'Quicksand',sans-serif;font-size:.7rem;font-weight:700;cursor:pointer;color:var(--text-muted);transition:all .18s;}
-.strip-edit-btn:hover{color:var(--orange);border-color:var(--orange);}
-.deploy-counter{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
-.counter-badge{background:var(--orange);color:#fff;font-size:.78rem;font-weight:700;padding:5px 14px;border-radius:20px;letter-spacing:1px;}
-.counter-undeployed{background:var(--gray-200);color:var(--text-muted);font-size:.78rem;font-weight:600;padding:5px 14px;border-radius:20px;}
-.deploy-layout{display:grid;grid-template-columns:220px 1fr;gap:16px;}
-.pool-panel{background:var(--white);border:1.5px solid var(--gray-200);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px;position:sticky;top:80px;align-self:start;box-shadow:0 2px 8px rgba(0,0,0,.06);}
-.pool-title{font-size:.65rem;letter-spacing:3px;text-transform:uppercase;color:var(--orange);font-weight:700;}
-.add-agent{display:flex;flex-direction:column;gap:6px;}
-.agent-input{background:var(--white);border:1.5px solid var(--gray-200);color:var(--text);padding:7px 10px;border-radius:7px;font-family:'Quicksand',sans-serif;font-size:.8rem;width:100%;}
-.agent-input::placeholder{color:var(--gray-400);}
-.agent-input:focus{outline:none;border-color:var(--green);}
-.btn-add-agent{background:var(--orange);border:none;color:white;padding:9px;border-radius:7px;cursor:pointer;font-family:'Quicksand',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;}
-.btn-add-agent:hover{background:var(--orange-dark);}
-.pool-drop{flex:1;min-height:140px;max-height:420px;overflow-y:auto;border:2px dashed var(--gray-300);border-radius:9px;padding:8px;display:flex;flex-direction:column;gap:6px;}
-.pool-drop.drag-over{border-color:var(--green);background:var(--green-bg);}
-.pool-empty{color:var(--gray-400);font-size:.7rem;text-align:center;padding:24px 0;}
-.zones-grid{display:grid;gap:14px;align-content:start;}
-.zone-card{background:var(--white);border:1.5px solid var(--gray-200);border-radius:12px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.05);}
-.zone-header{padding:10px 16px;display:flex;align-items:center;justify-content:space-between;background:var(--green-bg);border-bottom:2px solid var(--green);}
-.zone-name-lbl{font-size:.78rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--orange);}
-.zone-badge{font-size:.65rem;color:var(--green-dark);font-weight:600;}
-.zone-drop{min-height:80px;padding:10px;display:flex;flex-direction:column;gap:8px;transition:background .15s;}
-.zone-drop.drag-over{background:var(--green-bg);}
-.zone-empty{color:var(--gray-400);font-size:.68rem;text-align:center;padding:18px 0;width:100%;}
-.zone-assign-row{display:flex;gap:6px;align-items:center;padding:4px 0;}
-.zone-assign-select{flex:1;padding:6px 10px;border-radius:7px;border:1.5px solid var(--gray-300);font-family:'Quicksand',sans-serif;font-size:.78rem;background:#fff;color:var(--text);cursor:pointer;}
-.zone-assign-select:focus{outline:none;border-color:var(--green);}
-.zone-assign-btn{padding:6px 12px;border-radius:7px;border:none;background:var(--green);color:#fff;font-family:'Quicksand',sans-serif;font-size:.72rem;font-weight:700;cursor:pointer;white-space:nowrap;}
-.zone-assign-btn:hover{background:var(--green-dark);}
-.agent-card{background:var(--white);border:1.5px solid var(--gray-200);border-radius:8px;padding:7px 10px;cursor:grab;user-select:none;display:flex;justify-content:space-between;align-items:center;transition:border-color .15s,box-shadow .15s;}
-.agent-card:hover{border-color:var(--green);box-shadow:0 2px 8px rgba(0,0,0,.08);}
-.agent-card:active{cursor:grabbing;}
-.agent-card.dragging{opacity:.3;}
-.agent-codename{font-size:.78rem;font-weight:600;color:var(--text);}
-.agent-phone{font-size:.67rem;color:var(--text-muted);margin-top:2px;}
-.btn-remove{background:none;border:none;color:var(--gray-400);cursor:pointer;font-size:1rem;line-height:1;padding:0 2px;flex-shrink:0;}
-.btn-remove:hover{color:#ef4444;}
-.actions{display:flex;gap:10px;justify-content:center;margin-top:24px;flex-wrap:wrap;}
-.btn{padding:11px 26px;border-radius:9px;border:none;cursor:pointer;font-family:'Quicksand',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;transition:all .2s;}
-.btn-export{background:var(--orange);color:white;}
-.btn-export:hover{background:var(--orange-dark);}
-.btn-clear{background:var(--white);color:var(--text-muted);border:1.5px solid var(--gray-300);}
-.btn-clear:hover{background:var(--gray-100);}
-.btn-reset{background:#fff5f5;color:#dc2626;border:1.5px solid #fecaca;}
-.btn-reset:hover{background:var(--red-bg);}
-
-/* ── PREVIEW MODAL ───────────────────────────────────────── */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center;}
-.modal-overlay.open{display:flex;}
-.modal-box{background:#fff;border-radius:14px;padding:28px;max-width:900px;width:96%;max-height:94vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3);}
-.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
-.modal-title{font-size:1rem;font-weight:700;color:var(--text);letter-spacing:1px;text-transform:uppercase;}
-.modal-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
-.colour-toggle{display:flex;align-items:center;gap:6px;}
-.colour-toggle-label{font-size:.65rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);}
-.colour-btn{padding:6px 14px;border-radius:7px;border:2px solid transparent;cursor:pointer;font-family:'Quicksand',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;}
-.colour-btn.green-btn{background:#5a9e1a;color:#fff;}
-.colour-btn.amber-btn{background:#e08800;color:#fff;}
-.colour-btn.active{border-color:#1f2937;box-shadow:0 0 0 3px rgba(0,0,0,.12);}
-.col-picker{display:flex;align-items:center;gap:6px;}
-.col-picker-label{font-size:.65rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);}
-.col-btn{padding:5px 11px;border-radius:6px;border:1.5px solid var(--gray-300);background:var(--white);font-family:'Quicksand',sans-serif;font-size:.72rem;font-weight:700;cursor:pointer;color:var(--text-muted);transition:all .18s;}
-.col-btn.active{background:var(--green);border-color:var(--green);color:#fff;}
-.modal-close{background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--gray-400);}
-.modal-close:hover{color:var(--text);}
-#previewCanvas{display:block;margin:0 auto;max-width:100%;border-radius:6px;}
-.modal-actions{display:flex;gap:10px;margin-top:20px;justify-content:center;flex-wrap:wrap;}
-.btn-deploy-save{background:var(--green);color:#fff;}
-.btn-deploy-save:hover{background:var(--green-dark);}
-
-/* ── ROSTER MODAL ────────────────────────────────────────── */
-.roster-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:center;justify-content:center;}
-.roster-overlay.open{display:flex;}
-.roster-box{background:#fff;border-radius:14px;padding:28px;max-width:560px;width:95%;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3);}
-.roster-title{font-size:1rem;font-weight:700;margin-bottom:14px;color:var(--text);}
-.roster-search{width:100%;padding:8px 12px;border:1.5px solid var(--gray-300);border-radius:8px;font-family:'Quicksand',sans-serif;font-size:.85rem;margin-bottom:12px;}
-.roster-search:focus{outline:none;border-color:var(--green);}
-.roster-list{display:flex;flex-direction:column;gap:6px;max-height:380px;overflow-y:auto;}
-.roster-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:.82rem;}
-.roster-item-name{font-weight:600;}
-.roster-item-phone{font-size:.7rem;color:var(--text-muted);}
-.btn-roster-del{background:none;border:none;color:var(--gray-400);cursor:pointer;font-size:.9rem;}
-.btn-roster-del:hover{color:var(--red);}
-.roster-footer{display:flex;gap:10px;margin-top:16px;justify-content:flex-end;}
-.btn-roster-close{padding:9px 22px;border-radius:8px;border:1.5px solid var(--gray-300);background:var(--white);font-family:'Quicksand',sans-serif;font-size:.75rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;}
-
-/* ── DEPLOYMENTS PAGE ────────────────────────────────────── */
-.deployments-page{max-width:1100px;margin:0 auto;padding:32px 24px 80px;}
-.deployments-page h2{font-size:1.4rem;font-weight:700;color:var(--text);margin-bottom:6px;}
-.deployments-sub{font-size:.85rem;color:var(--text-muted);margin-bottom:28px;}
-.dep-month-group{margin-bottom:32px;}
-.dep-month-title{font-size:.68rem;letter-spacing:3px;text-transform:uppercase;color:var(--orange);font-weight:700;padding-bottom:8px;border-bottom:2px solid var(--green-bg);margin-bottom:16px;}
-.dep-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;}
-.dep-card{background:#fff;border:1.5px solid var(--gray-200);border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.05);transition:box-shadow .2s;}
-.dep-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.1);}
-.dep-card-header{padding:10px 14px;background:var(--green-bg);border-bottom:2px solid var(--green);display:flex;justify-content:space-between;align-items:center;}
-.dep-card-title{font-size:.8rem;font-weight:700;color:var(--orange);}
-.dep-card-date{font-size:.68rem;color:var(--green-dark);font-weight:600;}
-.dep-card-body{padding:12px 14px;}
-.dep-card-meta{font-size:.75rem;color:var(--text-muted);margin-bottom:8px;display:flex;flex-direction:column;gap:3px;}
-.dep-card-img{width:100%;border-radius:6px;display:block;cursor:pointer;}
-.dep-card-img:hover{opacity:.9;}
-.dep-card-actions{display:flex;gap:8px;margin-top:10px;}
-.dep-action-btn{flex:1;padding:7px;border-radius:7px;border:1.5px solid var(--gray-300);background:#fff;font-family:'Quicksand',sans-serif;font-size:.7rem;font-weight:700;cursor:pointer;color:var(--text-muted);transition:all .18s;text-align:center;}
-.dep-action-btn:hover{background:var(--gray-100);}
-.dep-action-btn.danger:hover{background:var(--red-bg);color:var(--red);border-color:#fecaca;}
-.dep-empty{text-align:center;padding:60px 20px;color:var(--text-muted);}
-.dep-empty-icon{font-size:2.5rem;margin-bottom:12px;}
-.dep-archive-note{font-size:.75rem;color:var(--text-muted);background:var(--gray-100);border-radius:8px;padding:10px 14px;margin-bottom:20px;}
-.lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:400;align-items:center;justify-content:center;cursor:pointer;}
-.lightbox.open{display:flex;}
-.lightbox img{max-width:94vw;max-height:94vh;border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.5);}
-
-/* ── WEEKLY REPORT PAGE ──────────────────────────────────── */
-.report-page{max-width:900px;margin:0 auto;padding:40px 24px 80px;}
-.report-page-header{margin-bottom:32px;}
-.report-page-header h2{font-size:1.4rem;font-weight:700;color:var(--text);margin-bottom:6px;}
-.report-page-header p{font-size:.85rem;color:var(--text-muted);}
-
-.report-meta-bar{display:flex;flex-wrap:wrap;gap:14px;background:var(--green-bg);border:1.5px solid var(--green-mid);border-radius:12px;padding:18px 20px;margin-bottom:28px;}
-.report-meta-field{display:flex;flex-direction:column;gap:4px;flex:1;min-width:160px;}
-.report-meta-field label{font-size:.62rem;letter-spacing:2px;text-transform:uppercase;color:var(--green-dark);font-weight:700;}
-.report-meta-field input,.report-meta-field select{background:#fff;border:1.5px solid var(--green-mid);color:var(--text);padding:8px 11px;border-radius:8px;font-family:'Quicksand',sans-serif;font-size:.85rem;width:100%;}
-.report-meta-field input:focus,.report-meta-field select:focus{outline:none;border-color:var(--green);}
-
-.report-service-tabs{display:flex;gap:0;margin-bottom:28px;border-radius:10px;overflow:hidden;border:1.5px solid var(--gray-200);}
-.report-tab-btn{flex:1;padding:12px;background:#fff;border:none;font-family:'Quicksand',sans-serif;font-size:.8rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;color:var(--text-muted);transition:all .18s;border-right:1px solid var(--gray-200);}
-.report-tab-btn:last-child{border-right:none;}
-.report-tab-btn.active{background:var(--orange);color:#fff;}
-
-.report-section-card{background:#fff;border:1.5px solid var(--gray-200);border-radius:14px;margin-bottom:20px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.04);}
-.report-section-head{background:var(--green-bg);border-bottom:2px solid var(--green);padding:12px 20px;display:flex;align-items:center;gap:10px;}
-.report-section-head-icon{font-size:1rem;}
-.report-section-head-title{font-size:.68rem;letter-spacing:2.5px;text-transform:uppercase;color:var(--orange);font-weight:700;}
-.report-section-body{padding:20px;}
-
-.report-field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
-.report-field:last-child{margin-bottom:0;}
-.report-field label{font-size:.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);font-weight:700;}
-.report-field textarea{background:#fff;border:1.5px solid var(--gray-300);color:var(--text);padding:10px 13px;border-radius:9px;font-family:'Quicksand',sans-serif;font-size:.88rem;width:100%;resize:vertical;min-height:80px;line-height:1.6;}
-.report-field textarea:focus{outline:none;border-color:var(--green);}
-.report-field input[type=text],.report-field input[type=number]{background:#fff;border:1.5px solid var(--gray-300);color:var(--text);padding:9px 13px;border-radius:9px;font-family:'Quicksand',sans-serif;font-size:.88rem;width:100%;}
-.report-field input:focus{outline:none;border-color:var(--green);}
-
-.report-materials-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;}
-.report-material-item{display:flex;flex-direction:column;gap:5px;}
-.report-material-item label{font-size:.68rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);font-weight:700;}
-.report-material-item input{background:#fff;border:1.5px solid var(--gray-300);color:var(--text);padding:8px 11px;border-radius:8px;font-family:'Quicksand',sans-serif;font-size:.85rem;width:100%;}
-.report-material-item input:focus{outline:none;border-color:var(--green);}
-
-.report-signature-row{display:flex;flex-wrap:wrap;gap:16px;}
-.report-signature-field{flex:1;min-width:200px;display:flex;flex-direction:column;gap:6px;}
-.report-signature-field label{font-size:.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);font-weight:700;}
-.report-signature-field input{background:#fff;border:1.5px solid var(--gray-300);color:var(--text);padding:9px 13px;border-radius:9px;font-family:'Quicksand',sans-serif;font-size:.88rem;width:100%;}
-.report-signature-field input:focus{outline:none;border-color:var(--green);}
-
-.report-actions{display:flex;gap:12px;justify-content:center;margin-top:28px;flex-wrap:wrap;}
-.btn-report-download{background:var(--green);color:#fff;padding:13px 32px;border-radius:10px;border:none;font-family:'Quicksand',sans-serif;font-size:.85rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:background .2s;}
-.btn-report-download:hover{background:var(--green-dark);}
-.btn-report-clear{background:#fff;color:var(--text-muted);border:1.5px solid var(--gray-300);padding:13px 28px;border-radius:10px;font-family:'Quicksand',sans-serif;font-size:.85rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;}
-.btn-report-clear:hover{background:var(--gray-100);}
-
-/* active tab panel */
-.report-tab-panel{display:none;}
-.report-tab-panel.active{display:block;}
-
-/* ── TOAST ────────────────────────────────────────────────── */
-.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:var(--green);color:white;padding:10px 28px;border-radius:9px;font-size:.8rem;font-weight:700;letter-spacing:1px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999;}
-.toast.show{opacity:1;}
-
-/* ── RESPONSIVE ──────────────────────────────────────────── */
-@media(max-width:750px){
-  .deploy-layout{grid-template-columns:1fr;}
-  .about-grid{grid-template-columns:1fr;}
-  .zones-grid{grid-template-columns:1fr !important;}
-  .info-row{grid-template-columns:1fr;gap:4px;}
-  .config-fields{flex-direction:column;}
-  nav{gap:2px;}
-  .nav-btn{padding:8px 10px;font-size:.7rem;}
-  .report-materials-grid{grid-template-columns:1fr 1fr;}
-}
+body{font-family:Arial, sans-serif;margin:0;background:#f3f4f6;color:#1f2937}
+.page{display:none;padding:20px}
+.page.active{display:block}
+.card{background:white;padding:20px;border-radius:10px;max-width:420px;margin:40px auto;box-shadow:0 5px 20px rgba(0,0,0,.08)}
+input,button,select,textarea{width:100%;padding:10px;margin-top:10px}
+button{background:#5a9e1a;color:white;border:none;border-radius:6px;font-weight:bold;cursor:pointer}
+button.secondary{background:#d4700a}
+.list{max-width:700px;margin:auto}
+.item{background:white;padding:14px;margin-bottom:10px;border-radius:8px}
+.badge{font-size:12px;padding:3px 8px;border-radius:20px}
+.ok{background:#16a34a;color:white}
+.wait{background:#eab308;color:black}
+.lock{background:#dc2626;color:white}
+.admin{color:#d4700a;font-weight:bold}
 </style>
 </head>
+
 <body>
 
-<!-- HEADER -->
-<header class="site-header">
-  <div class="header-inner">
-    <div class="logo-wrap" onclick="showPage('about')">
-      <img id="logoImg" class="logo-img-circle" alt="Phaneroo" title="Click to change logo"/>
-      <div class="logo-text-wrap">
-        <span class="logo-name">Phaneroo</span>
-        <span class="logo-tagline">Make Manifest</span>
-      </div>
-    </div>
-    <nav>
-      <button class="nav-btn active" onclick="showPage('about')">About</button>
-      <button class="nav-btn" onclick="showPage('configure')">⚙ Configure</button>
-      <button class="nav-btn" onclick="showPage('deploy')">⚡ Deploy</button>
-      <button class="nav-btn" onclick="showPage('deployments')">📁 Deployments</button>
-      <button class="nav-btn" onclick="showPage('report')">📝 Report</button>
-    </nav>
-  </div>
-</header>
-
-<!-- ══════════════════════════════════════════════════════════ -->
-<!-- ABOUT PAGE                                                 -->
-<!-- ══════════════════════════════════════════════════════════ -->
-<div class="page active" id="page-about">
-  <div class="about-page">
-    <div class="about-hero">
-      <img id="aboutLogoImg" class="about-logo-big" alt="Phaneroo"/>
-      <h1 class="about-ministry-name">Phaneroo <span>Ministries</span> International</h1>
-      <p class="about-tagline">Make Manifest · Founded 2014 · Kampala, Uganda</p>
-      <p class="about-intro">A dynamic, life-transforming and generational impacting ministry — raising sons of God, separated for the demonstration of the God-life to the world and crowned with the glories of eternity.</p>
-    </div>
-    <div class="about-grid">
-      <div class="about-card">
-        <div class="card-label">Vision</div>
-        <div class="card-title">Transform Nations</div>
-        <div class="card-body">To transform nations and the entire world with the Word of God — raising a generation of believers who walk in the full knowledge and manifestation of the Word of God.</div>
-      </div>
-      <div class="about-card">
-        <div class="card-label">Mission</div>
-        <div class="card-title">Make Manifest</div>
-        <div class="card-body">To reveal the power of God in the lives of believers — equipping them with biblical teachings that empower victorious Christian lives and positive influence in society.</div>
-      </div>
-      <div class="about-card">
-        <div class="card-label">The Name</div>
-        <div class="card-title">"Phaneroo"</div>
-        <div class="card-body">From the Greek — meaning <em>"to make manifest."</em> Bringing to visibility that which existed but was not seen. Christians demonstrating the God-life to the world.</div>
-      </div>
-      <div class="about-card">
-        <div class="card-label">Outreach</div>
-        <div class="card-title">Nations &amp; Campuses</div>
-        <div class="card-body">Active in 200+ educational institutions in Uganda through Manifest Fellowship, and weekly outreach in over 15 prisons across the country.</div>
-      </div>
-    </div>
-    <div class="about-full-card">
-      <div class="full-card-header">
-        <div><div class="full-card-title">Ministry Profile</div><div class="full-card-sub">Quick Reference</div></div>
-      </div>
-      <div class="info-row"><div class="info-label">Founded</div><div class="info-value">August 14, 2014 — Theatre Labonita, Kampala, Uganda</div></div>
-      <div class="info-row"><div class="info-label">Vision bearer</div><div class="info-value">Apostle Grace Lubega</div></div>
-      <div class="info-row"><div class="info-label">Venue</div><div class="info-value">Phaneroo Grounds, UMA Upper Gardens, Lugogo, Kampala</div></div>
-      <div class="info-row"><div class="info-label">Address</div><div class="info-value">Plot 6 Kyambogo Drive, Ministers Village — off Martyrs Way, Ntinda, Kampala</div></div>
-      <div class="info-row"><div class="info-label">Services</div><div class="info-value">Thursdays (E.A.T, Phaneroo Grounds) &nbsp;·&nbsp; Sundays (First Service)</div></div>
-      <div class="info-row"><div class="info-label">Phone</div><div class="info-value"><a href="tel:+256200999400">+256 200 999 400</a></div></div>
-      <div class="info-row"><div class="info-label">Email</div><div class="info-value">info@phaneroo.org</div></div>
-      <div class="info-row"><div class="info-label">Website</div><div class="info-value"><a href="https://phaneroo.org" target="_blank">phaneroo.org</a></div></div>
-      <div class="info-row"><div class="info-label">World record</div><div class="info-value">Guinness World Record — Longest applause: 3 hrs 16 min 1 sec, 926 participants (July 30, 2023 · "Clap for Jesus")</div></div>
-      <div class="info-row"><div class="info-label">Values</div><div class="info-value"><div class="values-list"><span class="value-pill">Love</span><span class="value-pill">Faith</span><span class="value-pill">Holy Spirit</span><span class="value-pill">Word of God</span><span class="value-pill">Discipleship</span><span class="value-pill">Evangelism</span></div></div></div>
-    </div>
+<!-- LOGIN -->
+<div class="page active" id="loginPage">
+  <div class="card">
+    <h2>Login</h2>
+    <input id="loginUser" placeholder="username">
+    <input id="loginPass" type="password" placeholder="password (codename)">
+    <button onclick="login()">Login</button>
+    <div id="loginMsg"></div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════ -->
-<!-- CONFIGURE PAGE                                             -->
-<!-- ══════════════════════════════════════════════════════════ -->
-<div class="page" id="page-configure">
-  <div class="config-page">
-    <h2>Configure Deployment</h2>
-    <p class="config-sub">Set up your service details and select zones before heading to the deployment board.</p>
-    <div class="config-section">
-      <div class="config-section-title">1. Service Type</div>
-      <div class="svc-type-btns" id="svcTypeBtns">
-        <button class="svc-btn active" data-val="Phaneroo" onclick="setSvcType(this)">Phaneroo</button>
-        <button class="svc-btn" data-val="Sunday Service" onclick="setSvcType(this)">Sunday Service</button>
-        <button class="svc-btn" data-val="event" onclick="setSvcType(this)">Event</button>
-      </div>
-      <div class="event-name-wrap" id="eventNameWrap">
-        <input class="config-input" type="text" id="configEventName" placeholder="Enter event name…" style="max-width:300px;margin-top:4px;"/>
-      </div>
-    </div>
-    <div class="config-section">
-      <div class="config-section-title">2. Service Edition &amp; Details</div>
-      <div class="config-fields">
-        <div class="config-field">
-          <label>Service / Edition #</label>
-          <input class="config-input" type="text" id="configEdition" placeholder="e.g. 385"/>
-        </div>
-        <div class="config-field">
-          <label>Date</label>
-          <input class="config-input" type="date" id="configDate"/>
-        </div>
-        <div class="config-field">
-          <label>Department</label>
-          <input class="config-input" type="text" id="configDept" value="SECURITY"/>
-        </div>
-        <div class="config-field">
-          <label>Section</label>
-          <input class="config-input" type="text" id="configSection" value="GENERAL PARKING"/>
-        </div>
-      </div>
-    </div>
-    <div class="config-section">
-      <div class="config-section-title">3. Select Zones for This Deployment</div>
-      <div class="zone-picker" id="configZonePicker"></div>
-      <div class="zone-add-row">
-        <input class="zone-add-input" type="text" id="configNewZone" placeholder="Add new zone…" maxlength="20"/>
-        <button class="zone-add-btn" onclick="addConfigZone()">+ Add Zone</button>
-      </div>
-    </div>
-    <button class="config-proceed-btn" onclick="proceedToDeploy()">Proceed to Deployment Board →</button>
-  </div>
+<!-- SERVICE LIST -->
+<div class="page" id="servicesPage">
+  <h2>Services</h2>
+  <div class="list" id="serviceList"></div>
+  <button onclick="createService()" class="admin" id="adminCreateBtn">+ Create Service</button>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════ -->
-<!-- DEPLOY PAGE                                                -->
-<!-- ══════════════════════════════════════════════════════════ -->
-<div class="page" id="page-deploy">
-  <div class="deploy-page">
-    <div class="deploy-config-strip" id="deployConfigStrip">
-      <div class="strip-item"><span class="strip-lbl">Service</span><span class="strip-val" id="stripService">—</span></div>
-      <div class="strip-item"><span class="strip-lbl">Edition</span><span class="strip-val" id="stripEdition">—</span></div>
-      <div class="strip-item"><span class="strip-lbl">Date</span><span class="strip-val" id="stripDate">—</span></div>
-      <div class="strip-item"><span class="strip-lbl">Dept</span><span class="strip-val" id="stripDept">—</span></div>
-      <div class="strip-item"><span class="strip-lbl">Section</span><span class="strip-val" id="stripSection">—</span></div>
-      <button class="strip-edit-btn" onclick="showPage('configure')">✏ Edit Config</button>
-      <button class="strip-edit-btn" onclick="openRoster()">👥 Agent Roster</button>
-    </div>
-    <div class="deploy-counter">
-      <span class="counter-badge" id="deployedCount">0 Deployed</span>
-      <span class="counter-undeployed" id="undeployedCount">0 in pool</span>
-    </div>
-    <div class="deploy-layout">
-      <div class="pool-panel">
-        <div class="pool-title">Agent Pool</div>
-        <div class="add-agent">
-          <input class="agent-input" type="text" id="newCodename" placeholder="Code name" maxlength="30"/>
-          <input class="agent-input" type="text" id="newPhone" placeholder="Phone number" maxlength="20"/>
-          <button class="btn-add-agent" onclick="addAgent()">+ Add Agent</button>
-        </div>
-        <div class="pool-drop" id="pool" ondragover="onDragOver(event,this)" ondragleave="onDragLeave(this)" ondrop="onDrop(event,'pool')">
-          <span class="pool-empty">Agents appear here</span>
-        </div>
-      </div>
-      <div class="zones-grid" id="zonesGrid"></div>
-    </div>
-    <div class="actions">
-      <button class="btn btn-export" onclick="showPreview()">👁 Preview &amp; Export</button>
-      <button class="btn btn-clear" onclick="clearZones()">Clear Zones</button>
-      <button class="btn btn-reset" onclick="resetAll()">Reset All</button>
-    </div>
-  </div>
+<!-- SUBMISSION -->
+<div class="page" id="submitPage">
+  <h2 id="submitTitle"></h2>
+  <textarea id="reportText" placeholder="Enter report..."></textarea>
+  <button onclick="saveSubmission()">Save</button>
+  <button class="secondary" onclick="goBack()">Back</button>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════ -->
-<!-- DEPLOYMENTS PAGE                                           -->
-<!-- ══════════════════════════════════════════════════════════ -->
-<div class="page" id="page-deployments">
-  <div class="deployments-page">
-    <h2>Deployments</h2>
-    <p class="deployments-sub">All saved deployments. Individual records are kept for 31 days, then archived monthly.</p>
-    <div id="deploymentsContent"></div>
-  </div>
+<!-- ADMIN VIEW -->
+<div class="page" id="adminPage">
+  <h2 id="adminTitle"></h2>
+  <div class="list" id="adminSubmissions"></div>
+  <button class="secondary" onclick="goBack()">Back</button>
 </div>
-
-<!-- ══════════════════════════════════════════════════════════ -->
-<!-- WEEKLY REPORT PAGE                                         -->
-<!-- ══════════════════════════════════════════════════════════ -->
-<div class="page" id="page-report">
-  <div class="report-page">
-    <div class="report-page-header">
-      <h2>📝 Security Weekly Report</h2>
-      <p>Fill in the report details below, then download it as a Word document (.docx).</p>
-    </div>
-
-    <!-- Meta info -->
-    <div class="report-meta-bar">
-      <div class="report-meta-field">
-        <label>Week of</label>
-        <input type="date" id="rpt_week"/>
-      </div>
-      <div class="report-meta-field">
-        <label>Compiled by</label>
-        <input type="text" id="rpt_compiled_by" placeholder="Your name"/>
-      </div>
-      <div class="report-meta-field">
-        <label>Reviewed &amp; Signed by</label>
-        <input type="text" id="rpt_reviewed_by" placeholder="Reviewer name"/>
-      </div>
-    </div>
-
-    <!-- Service tabs -->
-    <div class="report-service-tabs">
-      <button class="report-tab-btn active" onclick="switchReportTab('thursday', this)">Thursday Service</button>
-      <button class="report-tab-btn" onclick="switchReportTab('sunday', this)">Sunday Service</button>
-    </div>
-
-    <!-- ── THURSDAY TAB ── -->
-    <div class="report-tab-panel active" id="rptTab-thursday">
-
-      <!-- Key Areas table fields -->
-      <div class="report-section-card">
-        <div class="report-section-head">
-          <span class="report-section-head-icon">🎯</span>
-          <span class="report-section-head-title">Key Areas</span>
-        </div>
-        <div class="report-section-body">
-          <div class="report-field">
-            <label>Objectives / Intended Outcomes</label>
-            <textarea id="thu_objectives" placeholder="Describe the objectives and intended outcomes for this service…"></textarea>
-          </div>
-          <div class="report-field">
-            <label>Key Observations</label>
-            <textarea id="thu_observations" placeholder="What was observed during this service?"></textarea>
-          </div>
-          <div class="report-field">
-            <label>Implementation Challenges</label>
-            <textarea id="thu_challenges" placeholder="What challenges were encountered?"></textarea>
-          </div>
-          <div class="report-field">
-            <label>Key Recommendations</label>
-            <textarea id="thu_recommendations" placeholder="What improvements are recommended?"></textarea>
-          </div>
-        </div>
-      </div>
-
-      <!-- Incidences -->
-      <div class="report-section-card">
-        <div class="report-section-head">
-          <span class="report-section-head-icon">⚠️</span>
-          <span class="report-section-head-title">Incidences That Occurred</span>
-        </div>
-        <div class="report-section-body">
-          <div class="report-field">
-            <label>Incident Report</label>
-            <textarea id="thu_incidents" placeholder="Describe any incidents that occurred. Write 'None' if there were no incidents…" style="min-height:100px;"></textarea>
-          </div>
-        </div>
-      </div>
-
-      <!-- Materials & Stats -->
-      <div class="report-section-card">
-        <div class="report-section-head">
-          <span class="report-section-head-icon">📊</span>
-          <span class="report-section-head-title">Other Details &amp; Materials</span>
-        </div>
-        <div class="report-section-body">
-          <div class="report-materials-grid">
-            <div class="report-material-item">
-              <label>Number of Ministers who served</label>
-              <input type="number" id="thu_ministers" min="0" placeholder="0"/>
-            </div>
-            <div class="report-material-item">
-              <label>Number of Police and Army</label>
-              <input type="number" id="thu_police" min="0" placeholder="0"/>
-            </div>
-            <div class="report-material-item">
-              <label>Number of Reflectors given</label>
-              <input type="number" id="thu_reflectors" min="0" placeholder="0"/>
-            </div>
-            <div class="report-material-item">
-              <label>Number of Tags dispatched</label>
-              <input type="number" id="thu_tags" min="0" placeholder="0"/>
-            </div>
-            <div class="report-material-item">
-              <label>Number of Walkie Talkies</label>
-              <input type="number" id="thu_walkies" min="0" placeholder="0"/>
-            </div>
-            <div class="report-material-item">
-              <label>Number of Cars Parked</label>
-              <input type="number" id="thu_cars" min="0" placeholder="0"/>
-            </div>
-            <div class="report-material-item">
-              <label>Number of Bags</label>
-              <input type="number" id="thu_bags" min="0" placeholder="0"/>
-            </div>
-            <div class="report-material-item">
-              <label>Other Materials</label>
-              <input type="text" id="thu_other_materials" placeholder="e.g. cones: 10"/>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div><!-- end thursday tab -->
-
-    <!-- ── SUNDAY TAB ── -->
-    <div class="report-tab-panel" id="rptTab-sunday">
-
-      <div class="report-section-card">
-        <div class="report-section-head">
-          <span class="report-section-head-icon">🎯</span>
-          <span class="report-section-head-title">Key Areas</span>
-        </div>
-        <div class="report-section-body">
-          <div class="report-field">
-            <label>Objectives / Intended Outcomes</label>
-            <textarea id="sun_objectives" placeholder="Describe the objectives and intended outcomes for this service…"></textarea>
-          </div>
-          <div class="report-field">
-            <label>Key Observations</label>
-            <textarea id="sun_observations" placeholder="What was observed during this service?"></textarea>
-          </div>
-          <div class="report-field">
-            <label>Implementation Challenges</label>
-            <textarea id="sun_challenges" placeholder="What challenges were encountered?"></textarea>
-          </div>
-          <div class="report-field">
-            <label>Key Recommendations</label>
-            <textarea id="sun_recommendations" placeholder="What improvements are recommended?"></textarea>
-          </div>
-        </div>
-      </div>
-
-      <div class="report-section-card">
-        <div class="report-section-head">
-          <span class="report-section-head-icon">⚠️</span>
-          <span class="report-section-head-title">Incidences That Occurred</span>
-        </div>
-        <div class="report-section-body">
-          <div class="report-field">
-            <label>Incident Report</label>
-            <textarea id="sun_incidents" placeholder="Describe any incidents that occurred. Write 'None' if there were no incidents…" style="min-height:100px;"></textarea>
-          </div>
-        </div>
-      </div>
-
-      <div class="report-section-card">
-        <div class="report-section-head">
-          <span class="report-section-head-icon">📊</span>
-          <span class="report-section-head-title">Other Details &amp; Materials</span>
-        </div>
-        <div class="report-section-body">
-          <div class="report-materials-grid">
-            <div class="report-material-item">
-              <label>Number of Ministers who served</label>
-              <input type="number" id="sun_ministers" min="0" placeholder="0"/>
-            </div>
-            <div class="report-material-item">
-              <label>Number of Police and Army</label>
-              <input type="number" id="sun_police" min="0" placeholder="0"/>
-            </div>
-            <div class="report-material-item">
-              <label>Number of Reflectors given</label>
-              <input type="number" id="sun_reflectors" min="0" placeholder="0"/>
-            </div>
-            <div class="report-material-item">
-              <label>Number of Tags dispatched</label>
-              <input type="number" id="sun_tags" min="0" placeholder="0"/>
-            </div>
-            <div class="report-material-item">
-              <label>Number of Walkie Talkies</label>
-              <input type="number" id="sun_walkies" min="0" placeholder="0"/>
-            </div>
-            <div class="report-material-item">
-              <label>Number of Cars Parked</label>
-              <input type="number" id="sun_cars" min="0" placeholder="0"/>
-            </div>
-            <div class="report-material-item">
-              <label>Number of Bags</label>
-              <input type="number" id="sun_bags" min="0" placeholder="0"/>
-            </div>
-            <div class="report-material-item">
-              <label>Other Materials</label>
-              <input type="text" id="sun_other_materials" placeholder="e.g. cones: 10"/>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div><!-- end sunday tab -->
-
-    <!-- Signatures -->
-    <div class="report-section-card" style="margin-top:20px;">
-      <div class="report-section-head">
-        <span class="report-section-head-icon">✍️</span>
-        <span class="report-section-head-title">Sign Off</span>
-      </div>
-      <div class="report-section-body">
-        <div class="report-signature-row">
-          <div class="report-signature-field">
-            <label>Compiled by</label>
-            <input type="text" id="rpt_sign_compiled" placeholder="Full name"/>
-          </div>
-          <div class="report-signature-field">
-            <label>Reviewed and Signed by</label>
-            <input type="text" id="rpt_sign_reviewed" placeholder="Full name"/>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="report-actions">
-      <button class="btn-report-download" onclick="downloadReport()">⬇ Download Word Doc (.docx)</button>
-      <button class="btn-report-clear" onclick="clearReport()">Clear Form</button>
-    </div>
-  </div>
-</div>
-
-<!-- PREVIEW MODAL -->
-<div class="modal-overlay" id="previewModal">
-  <div class="modal-box">
-    <div class="modal-header">
-      <span class="modal-title">Deployment Sheet Preview</span>
-      <div class="modal-right">
-        <div class="colour-toggle">
-          <span class="colour-toggle-label">Header:</span>
-          <button class="colour-btn green-btn active" id="btnGreen" onclick="setTabColour('green')">Green</button>
-          <button class="colour-btn amber-btn" id="btnAmber" onclick="setTabColour('amber')">Amber</button>
-        </div>
-        <div class="col-picker">
-          <span class="col-picker-label">Columns:</span>
-          <button class="col-btn active" id="colBtn1" onclick="setPreviewCols(1)">1</button>
-          <button class="col-btn" id="colBtn2" onclick="setPreviewCols(2)">2</button>
-          <button class="col-btn" id="colBtn3" onclick="setPreviewCols(3)">3</button>
-        </div>
-        <button class="modal-close" onclick="closePreview()">×</button>
-      </div>
-    </div>
-    <canvas id="previewCanvas"></canvas>
-    <div class="modal-actions">
-      <button class="btn btn-deploy-save" onclick="saveDeploymentAndGo()">✅ Deploy &amp; Save</button>
-      <button class="btn btn-export" onclick="downloadJpeg()">⬇ Download JPEG</button>
-      <button class="btn btn-clear" onclick="closePreview()">Close</button>
-    </div>
-  </div>
-</div>
-
-<!-- ROSTER MODAL -->
-<div class="roster-overlay" id="rosterModal">
-  <div class="roster-box">
-    <div class="roster-title">👥 Agent Roster — All Registered Agents</div>
-    <input class="roster-search" type="text" id="rosterSearch" placeholder="Search by name or phone…" oninput="renderRoster()"/>
-    <div class="roster-list" id="rosterList"></div>
-    <div class="roster-footer"><button class="btn-roster-close" onclick="closeRoster()">Close</button></div>
-  </div>
-</div>
-
-<div class="lightbox" id="lightbox" onclick="closeLightbox()">
-  <img id="lightboxImg" src="" alt="Deployment"/>
-</div>
-
-<div class="toast" id="toast"></div>
-<input type="file" id="logoUpload" accept="image/*" style="display:none" onchange="handleLogoUpload(event)"/>
 
 <script>
-/* ============================================================
- * BOND SPACE — Main Application Script
- * ============================================================ */
+/* ===============================
+   DATABASE (IndexedDB)
+================================ */
+let db;
+const req = indexedDB.open("bondSpaceDB", 1);
 
-const DEFAULT_ZONES = ['LAKESIDE','HAVEN','DUCATI','TALLY','SUPPORT'];
-const CANVAS_W = 1200;
-const CANVAS_H = 1700;
-const DEPLOYMENT_RETENTION_DAYS = 31;
-const DEFAULT_PREVIEW_COLS = 2;
-
-let agents = {};
-let za = { pool: [], zones: {} };
-let activeZones = [...DEFAULT_ZONES];
-let currentConfig = {
-  serviceType: 'Phaneroo', edition: '', date: '',
-  dept: 'SECURITY', section: 'GENERAL PARKING',
-  selectedZones: [...DEFAULT_ZONES]
+req.onupgradeneeded = e => {
+  db = e.target.result;
+  db.createObjectStore("users",{keyPath:"username"});
+  db.createObjectStore("services",{keyPath:"id"});
+  db.createObjectStore("submissions",{keyPath:["serviceId","username"]});
+  db.createObjectStore("locks",{keyPath:"username"});
 };
-let tabColour = 'green';
-let previewCols = DEFAULT_PREVIEW_COLS;
 
-/* ── LOGO ─────────────────────────────────────────────────── */
-const FALLBACK_LOGO = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 44 44'%3E%3Ccircle cx='22' cy='22' r='22' fill='%235a9e1a'/%3E%3Ctext x='22' y='30' font-size='26' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='bold'%3EP%3C/text%3E%3C/svg%3E";
-const FALLBACK_LOGO_BIG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Ccircle cx='40' cy='40' r='40' fill='%235a9e1a'/%3E%3Ctext x='40' y='54' font-size='48' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='bold'%3EP%3C/text%3E%3C/svg%3E";
+req.onsuccess = e => { db = e.target.result; };
 
-function initLogos() {
-  const saved = localStorage.getItem('phLogo');
-  document.getElementById('logoImg').src = saved || FALLBACK_LOGO;
-  document.getElementById('aboutLogoImg').src = saved || FALLBACK_LOGO_BIG;
-}
-document.getElementById('logoImg').addEventListener('click', e => {
-  e.stopPropagation();
-  document.getElementById('logoUpload').click();
-});
-function handleLogoUpload(e) {
-  const file = e.target.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    const src = ev.target.result;
-    document.getElementById('logoImg').src = src;
-    document.getElementById('aboutLogoImg').src = src;
-    localStorage.setItem('phLogo', src);
-    showToast('Logo updated!');
-  };
-  reader.readAsDataURL(file);
-}
+function tx(store,mode="readonly"){return db.transaction(store,mode).objectStore(store);}
 
-/* ── PAGE NAVIGATION ──────────────────────────────────────── */
-function showPage(name) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('page-' + name).classList.add('active');
-  const navBtn = document.querySelector(`.nav-btn[onclick*="'${name}'"]`);
-  if (navBtn) navBtn.classList.add('active');
-  window.scrollTo(0, 0);
-  if (name === 'deploy') refreshDeployStrip();
-  if (name === 'deployments') { archiveOldDeployments(); renderDeployments(); }
-  if (name === 'configure') initConfigPage();
-}
+/* ===============================
+   AUTH
+================================ */
+let currentUser=null;
 
-/* ── CONFIGURE PAGE ───────────────────────────────────────── */
-let configSvcType = 'Phaneroo';
-function setSvcType(btn) {
-  document.querySelectorAll('.svc-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  configSvcType = btn.dataset.val;
-  document.getElementById('eventNameWrap').classList.toggle('show', configSvcType === 'event');
-}
-function initConfigPage() {
-  document.getElementById('configEdition').value = currentConfig.edition || '';
-  document.getElementById('configDate').value = currentConfig.date || '';
-  document.getElementById('configDept').value = currentConfig.dept || 'SECURITY';
-  document.getElementById('configSection').value = currentConfig.section || 'GENERAL PARKING';
-  document.querySelectorAll('.svc-btn').forEach(b => {
-    b.classList.toggle('active', b.dataset.val === currentConfig.serviceType);
-  });
-  configSvcType = currentConfig.serviceType;
-  document.getElementById('eventNameWrap').classList.toggle('show', configSvcType === 'event');
-  renderConfigZones();
-}
-function getAllZones() {
-  const custom = JSON.parse(localStorage.getItem('bondCustomZones') || '[]');
-  const all = [...DEFAULT_ZONES];
-  custom.forEach(z => { if (!all.includes(z)) all.push(z); });
-  return all;
-}
-function renderConfigZones() {
-  const picker = document.getElementById('configZonePicker');
-  picker.innerHTML = '';
-  getAllZones().forEach(z => {
-    const isDefault = DEFAULT_ZONES.includes(z);
-    const chip = document.createElement('div');
-    chip.className = 'zone-pick-chip' + (currentConfig.selectedZones.includes(z) ? ' active' : '') + (!isDefault ? ' custom' : '');
-    chip.dataset.zone = z;
-    chip.innerHTML = z.charAt(0) + z.slice(1).toLowerCase() + (!isDefault ? '<span class="chip-x">×</span>' : '');
-    chip.addEventListener('click', (e) => { if (e.target.classList.contains('chip-x')) return; chip.classList.toggle('active'); });
-    const x = chip.querySelector('.chip-x');
-    if (x) { x.addEventListener('click', (e) => { e.stopPropagation(); removeCustomZone(z); renderConfigZones(); }); }
-    picker.appendChild(chip);
-  });
-}
-function addConfigZone() {
-  const inp = document.getElementById('configNewZone');
-  const z = inp.value.trim().toUpperCase();
-  if (!z || z.length < 2) { showToast('Zone name too short'); return; }
-  if (getAllZones().includes(z)) { showToast('Zone already exists'); return; }
-  const custom = JSON.parse(localStorage.getItem('bondCustomZones') || '[]');
-  custom.push(z);
-  localStorage.setItem('bondCustomZones', JSON.stringify(custom));
-  inp.value = '';
-  renderConfigZones();
-  showToast(z + ' added');
-}
-function removeCustomZone(z) {
-  let custom = JSON.parse(localStorage.getItem('bondCustomZones') || '[]');
-  custom = custom.filter(c => c !== z);
-  localStorage.setItem('bondCustomZones', JSON.stringify(custom));
-  currentConfig.selectedZones = currentConfig.selectedZones.filter(s => s !== z);
-}
-function proceedToDeploy() {
-  const selectedZones = [];
-  document.querySelectorAll('#configZonePicker .zone-pick-chip.active').forEach(chip => { selectedZones.push(chip.dataset.zone); });
-  if (!selectedZones.length) { showToast('Select at least one zone'); return; }
-  const svcType = configSvcType;
-  const eventName = document.getElementById('configEventName').value.trim();
-  currentConfig = {
-    serviceType: svcType === 'event' ? (eventName || 'Event') : svcType,
-    edition: document.getElementById('configEdition').value.trim(),
-    date: document.getElementById('configDate').value,
-    dept: document.getElementById('configDept').value.trim() || 'SECURITY',
-    section: document.getElementById('configSection').value.trim() || 'GENERAL PARKING',
-    selectedZones
-  };
-  activeZones = [...selectedZones];
-  Object.keys(za.zones).forEach(z => {
-    if (!activeZones.includes(z)) {
-      (za.zones[z] || []).forEach(id => { if (!za.pool.includes(id)) za.pool.push(id); });
-      delete za.zones[z];
+function login(){
+  const u=loginUser.value.trim();
+  const p=loginPass.value.trim();
+  if(!u||!p) return;
+
+  tx("locks").get(u).onsuccess=e=>{
+    if(e.target.result){
+      loginMsg.innerText="Account locked. Contact admin.";
+      return;
     }
-  });
-  showPage('deploy');
-}
 
-/* ── DEPLOY PAGE — CONFIG STRIP ───────────────────────────── */
-function refreshDeployStrip() {
-  document.getElementById('stripService').textContent = currentConfig.serviceType || '—';
-  document.getElementById('stripEdition').textContent = currentConfig.edition || '—';
-  document.getElementById('stripDate').textContent = currentConfig.date || '—';
-  document.getElementById('stripDept').textContent = currentConfig.dept || '—';
-  document.getElementById('stripSection').textContent = currentConfig.section || '—';
-  activeZones = [...(currentConfig.selectedZones || DEFAULT_ZONES)];
-  renderAll();
-}
-
-/* ── AGENT PERSISTENCE ────────────────────────────────────── */
-function saveAgents() { localStorage.setItem('bondAgents', JSON.stringify(Object.values(agents))); }
-function loadAgents() {
-  const saved = JSON.parse(localStorage.getItem('bondAgents') || '[]');
-  saved.forEach(a => { agents[a.id] = a; });
-  const inZone = Object.values(za.zones).flat();
-  Object.keys(agents).forEach(id => { if (!inZone.includes(id) && !za.pool.includes(id)) za.pool.push(id); });
-}
-
-/* ── AGENT MANAGEMENT ─────────────────────────────────────── */
-function addAgent() {
-  const codename = document.getElementById('newCodename').value.trim();
-  const phone = document.getElementById('newPhone').value.trim();
-  if (!codename || !phone) { showToast('Both name and phone required'); return; }
-  const id = 'a-' + Date.now();
-  agents[id] = { id, codename, phone };
-  za.pool.push(id);
-  document.getElementById('newCodename').value = '';
-  document.getElementById('newPhone').value = '';
-  saveAgents();
-  renderAll();
-  showToast(codename + ' added');
-}
-function removeAgentPermanently(id) {
-  if (!confirm('Remove this agent from the roster permanently?')) return;
-  za.pool = za.pool.filter(i => i !== id);
-  Object.keys(za.zones).forEach(z => { za.zones[z] = za.zones[z].filter(i => i !== id); });
-  delete agents[id];
-  saveAgents();
-  renderAll();
-  renderRoster();
-}
-function removeFromZone(id, zone) {
-  za.zones[zone] = (za.zones[zone] || []).filter(i => i !== id);
-  if (!za.pool.includes(id)) za.pool.push(id);
-  renderAll();
-}
-
-/* ── RENDER ───────────────────────────────────────────────── */
-function renderAll() { renderPool(); renderZonesGrid(); updateCounter(); }
-function updateCounter() {
-  const totalAgents = Object.keys(agents).length;
-  const deployed = Object.values(za.zones).flat().filter((id, i, a) => a.indexOf(id) === i).length;
-  const inPool = za.pool.filter(id => agents[id]).length;
-  document.getElementById('deployedCount').textContent = `${deployed}/${totalAgents} Deployed`;
-  document.getElementById('undeployedCount').textContent = `${inPool} in pool`;
-}
-function renderPool() {
-  const pool = document.getElementById('pool');
-  pool.innerHTML = '';
-  const validPool = za.pool.filter(id => agents[id]);
-  if (!validPool.length) { pool.innerHTML = '<span class="pool-empty">Agents appear here</span>'; return; }
-  validPool.forEach(id => { const a = agents[id]; pool.appendChild(makeAgentCard(a, 'pool', null)); });
-}
-function renderZonesGrid() {
-  const grid = document.getElementById('zonesGrid');
-  grid.innerHTML = '';
-  grid.style.gridTemplateColumns = `repeat(${previewCols}, 1fr)`;
-  activeZones.forEach(z => {
-    if (!za.zones[z]) za.zones[z] = [];
-    const card = document.createElement('div');
-    card.className = 'zone-card';
-    const header = document.createElement('div');
-    header.className = 'zone-header';
-    header.innerHTML = `<span class="zone-name-lbl">${z}</span><span class="zone-badge">${za.zones[z].length} agent(s)</span>`;
-    const drop = document.createElement('div');
-    drop.className = 'zone-drop';
-    drop.id = 'zone-' + z;
-    drop.ondragover = e => onDragOver(e, drop);
-    drop.ondragleave = () => onDragLeave(drop);
-    drop.ondrop = e => onDrop(e, z);
-    drop.appendChild(makeAssignRow(z));
-    if (!za.zones[z].length) {
-      const empty = document.createElement('span');
-      empty.className = 'zone-empty';
-      empty.textContent = 'No agents assigned yet';
-      drop.appendChild(empty);
-    } else {
-      za.zones[z].forEach(id => { const a = agents[id]; if (!a) return; drop.appendChild(makeAgentCard(a, 'zone', z)); });
-    }
-    card.appendChild(header);
-    card.appendChild(drop);
-    grid.appendChild(card);
-  });
-}
-function makeAssignRow(zone) {
-  const row = document.createElement('div');
-  row.className = 'zone-assign-row';
-  const sel = document.createElement('select');
-  sel.className = 'zone-assign-select';
-  const defaultOpt = document.createElement('option');
-  defaultOpt.value = '';
-  defaultOpt.textContent = '— Assign agent —';
-  sel.appendChild(defaultOpt);
-  za.pool.filter(id => agents[id]).forEach(id => {
-    const a = agents[id];
-    const opt = document.createElement('option');
-    opt.value = id;
-    opt.textContent = a.codename + ' · ' + a.phone;
-    sel.appendChild(opt);
-  });
-  const btn = document.createElement('button');
-  btn.className = 'zone-assign-btn';
-  btn.textContent = 'Assign';
-  btn.onclick = () => { const agentId = sel.value; if (!agentId) { showToast('Select an agent first'); return; } assignAgentToZone(agentId, zone); };
-  row.appendChild(sel);
-  row.appendChild(btn);
-  return row;
-}
-function assignAgentToZone(agentId, zone) {
-  za.pool = za.pool.filter(id => id !== agentId);
-  Object.keys(za.zones).forEach(z => { if (z !== zone) za.zones[z] = za.zones[z].filter(id => id !== agentId); });
-  if (!za.zones[zone]) za.zones[zone] = [];
-  if (!za.zones[zone].includes(agentId)) za.zones[zone].push(agentId);
-  renderAll();
-}
-function makeAgentCard(a, source, zone) {
-  const card = document.createElement('div');
-  card.className = 'agent-card';
-  card.draggable = true;
-  card.id = (source === 'zone' ? 'zone-agent-' : 'agent-') + a.id;
-  const removeBtn = source === 'zone'
-    ? `<button class="btn-remove" onclick="removeFromZone('${a.id}','${zone}')">✕</button>`
-    : `<button class="btn-remove" onclick="removeAgentPermanently('${a.id}')">✕</button>`;
-  card.innerHTML = `<div><div class="agent-codename">${esc(a.codename)}</div><div class="agent-phone">${esc(a.phone)}</div></div>${removeBtn}`;
-  card.addEventListener('dragstart', e => {
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('agentId', a.id);
-    if (zone) e.dataTransfer.setData('fromZone', zone);
-    card.classList.add('dragging');
-  });
-  card.addEventListener('dragend', () => card.classList.remove('dragging'));
-  return card;
-}
-
-/* ── DRAG & DROP ──────────────────────────────────────────── */
-function onDragOver(e, el) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; el.classList.add('drag-over'); }
-function onDragLeave(el) { el.classList.remove('drag-over'); }
-function onDrop(e, zone) {
-  e.preventDefault();
-  const dropEl = e.target.closest('.zone-drop') || e.target.closest('.pool-drop');
-  if (dropEl) dropEl.classList.remove('drag-over');
-  const agentId = e.dataTransfer.getData('agentId');
-  const fromZone = e.dataTransfer.getData('fromZone');
-  if (!agents[agentId]) return;
-  if (zone === 'pool') {
-    if (fromZone) za.zones[fromZone] = za.zones[fromZone].filter(id => id !== agentId);
-    else za.pool = za.pool.filter(id => id !== agentId);
-    if (!za.pool.includes(agentId)) za.pool.push(agentId);
-  } else {
-    if (fromZone) za.zones[fromZone] = za.zones[fromZone].filter(id => id !== agentId);
-    else za.pool = za.pool.filter(id => id !== agentId);
-    if (!za.zones[zone]) za.zones[zone] = [];
-    if (!za.zones[zone].includes(agentId)) za.zones[zone].push(agentId);
-  }
-  renderAll();
-}
-
-/* ── ROSTER ───────────────────────────────────────────────── */
-function openRoster() { document.getElementById('rosterModal').classList.add('open'); renderRoster(); }
-function closeRoster() { document.getElementById('rosterModal').classList.remove('open'); }
-function renderRoster() {
-  const q = (document.getElementById('rosterSearch').value || '').toLowerCase();
-  const list = Object.values(agents).filter(a => (a.codename.toLowerCase() + a.phone).includes(q));
-  const el = document.getElementById('rosterList');
-  if (!list.length) { el.innerHTML = '<div style="color:var(--gray-400);font-size:.8rem;padding:12px;">No agents yet.</div>'; return; }
-  el.innerHTML = list.map(a =>
-    `<div class="roster-item">
-      <div><div class="roster-item-name">${esc(a.codename)}</div><div class="roster-item-phone">${esc(a.phone)}</div></div>
-      <button class="btn-roster-del" onclick="removeAgentPermanently('${a.id}')">🗑</button>
-    </div>`
-  ).join('');
-}
-
-/* ── PREVIEW & EXPORT ─────────────────────────────────────── */
-function setTabColour(c) {
-  tabColour = c;
-  document.getElementById('btnGreen').classList.toggle('active', c === 'green');
-  document.getElementById('btnAmber').classList.toggle('active', c === 'amber');
-  renderPreview();
-}
-function setPreviewCols(n) {
-  previewCols = n;
-  [1,2,3].forEach(i => document.getElementById('colBtn'+i).classList.toggle('active', i === n));
-  renderZonesGrid();
-  renderPreview();
-}
-function showPreview() { document.getElementById('previewModal').classList.add('open'); renderPreview(); }
-function closePreview() { document.getElementById('previewModal').classList.remove('open'); }
-function renderPreview() {
-  const canvas = document.getElementById('previewCanvas');
-  const ctx = canvas.getContext('2d');
-  const dpr = window.devicePixelRatio || 1;
-  const W = CANVAS_W;
-  const cols = previewCols;
-  const colW = Math.floor((W - 40 - (cols - 1) * 12) / cols);
-  const headerH = 80;
-  const metaH = 120;
-  const zoneBlocks = buildZoneBlocks(ctx, colW);
-  const maxColH = calcMaxColH(zoneBlocks, cols);
-  const H = headerH + metaH + maxColH + 80;
-  canvas.width = W * dpr;
-  canvas.height = H * dpr;
-  ctx.scale(dpr, dpr);
-  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H);
-  const hCol = tabColour === 'green' ? '#5a9e1a' : '#d4700a';
-  ctx.fillStyle = hCol; ctx.fillRect(0, 0, W, headerH);
-  ctx.fillStyle = '#fff'; ctx.font = 'bold 26px Quicksand, Arial';
-  ctx.textAlign = 'center'; ctx.fillText('BOND SPACE — DEPLOYMENT SHEET', W / 2, 52);
-  let mx = 20; const my = headerH + 14;
-  ctx.font = '11px Quicksand, Arial'; ctx.textAlign = 'left';
-  const meta = [['SERVICE', currentConfig.serviceType],['EDITION', currentConfig.edition || '—'],['DATE', currentConfig.date || '—'],['DEPT', currentConfig.dept],['SECTION', currentConfig.section]];
-  meta.forEach(([lbl, val]) => {
-    ctx.fillStyle = '#888'; ctx.fillText(lbl, mx, my);
-    ctx.fillStyle = '#1f2937'; ctx.font = 'bold 13px Quicksand, Arial';
-    ctx.fillText(val, mx, my + 16);
-    ctx.font = '11px Quicksand, Arial';
-    mx += 220;
-  });
-  const totalAgents = Object.keys(agents).length;
-  const deployed = Object.values(za.zones).flat().filter((id, i, a) => a.indexOf(id) === i).length;
-  ctx.fillStyle = hCol; ctx.font = 'bold 12px Quicksand, Arial';
-  ctx.textAlign = 'right'; ctx.fillText(`${deployed}/${totalAgents} DEPLOYED`, W - 20, my + 16);
-  ctx.textAlign = 'left';
-  const startY = headerH + metaH;
-  drawZoneGrid(ctx, zoneBlocks, cols, colW, startY, W, hCol);
-  const notesY = startY + maxColH + 10;
-  ctx.strokeStyle = '#ddd'; ctx.lineWidth = 1;
-  ctx.strokeRect(20, notesY, W - 40, 50);
-  ctx.fillStyle = '#bbb'; ctx.font = '10px Quicksand, Arial'; ctx.textAlign = 'left';
-  ctx.fillText('Notes: ________________________________________________________________', 28, notesY + 18);
-}
-function buildZoneBlocks(ctx, colW) {
-  return activeZones.map(z => {
-    const lines = [];
-    const zoneAgents = za.zones[z] || [];
-    if (!zoneAgents.length) { lines.push({ type: 'empty' }); }
-    else { zoneAgents.forEach(id => { const a = agents[id]; if (!a) return; lines.push({ type: 'agent', codename: a.codename, phone: a.phone }); }); }
-    return { zone: z, lines };
-  });
-}
-function zoneBlockHeight(block) { return 30 + (block.lines.length * 18) + 12 + 10; }
-function calcMaxColH(blocks, cols) {
-  const colHeights = Array(cols).fill(0);
-  blocks.forEach((block, i) => { const col = i % cols; colHeights[col] += zoneBlockHeight(block) + 10; });
-  return Math.max(...colHeights);
-}
-function drawZoneGrid(ctx, blocks, cols, colW, startY, W, hCol) {
-  const colX = Array.from({ length: cols }, (_, i) => 20 + i * (colW + 12));
-  const colY = Array(cols).fill(startY);
-  blocks.forEach((block, i) => {
-    const col = i % cols;
-    const x = colX[col];
-    let y = colY[col];
-    const bh = zoneBlockHeight(block);
-    ctx.fillStyle = hCol;
-    ctx.fillRect(x, y, colW, 28);
-    ctx.fillStyle = '#fff'; ctx.font = 'bold 12px Quicksand, Arial';
-    ctx.textAlign = 'left';
-    ctx.fillText(block.zone, x + 10, y + 19);
-    ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.font = '10px Quicksand, Arial';
-    ctx.textAlign = 'right';
-    ctx.fillText(block.lines.filter(l => l.type === 'agent').length + ' agent(s)', x + colW - 8, y + 19);
-    ctx.textAlign = 'left';
-    y += 28;
-    ctx.fillStyle = '#fafafa';
-    ctx.fillRect(x, y, colW, bh - 28);
-    ctx.strokeStyle = '#e5e7eb'; ctx.lineWidth = 1;
-    ctx.strokeRect(x, y, colW, bh - 28);
-    if (block.lines[0].type === 'empty') {
-      ctx.fillStyle = '#bbb'; ctx.font = 'italic 10px Quicksand, Arial';
-      ctx.fillText('No agents assigned', x + 10, y + 16);
-    } else {
-      let ly = y + 14;
-      block.lines.forEach(l => {
-        ctx.fillStyle = '#1f2937'; ctx.font = 'bold 11px Quicksand, Arial';
-        ctx.fillText(l.codename, x + 10, ly);
-        ctx.fillStyle = '#6b7280'; ctx.font = '10px Quicksand, Arial';
-        ctx.fillText(l.phone, x + 10, ly + 12);
-        ly += 18;
-      });
-    }
-    colY[col] += bh + 10;
-  });
-}
-function downloadJpeg() {
-  const canvas = document.getElementById('previewCanvas');
-  const link = document.createElement('a');
-  link.href = canvas.toDataURL('image/jpeg', 0.95);
-  const dateStr = currentConfig.date || new Date().toISOString().split('T')[0];
-  link.download = `deployment-${currentConfig.serviceType}-${dateStr}.jpg`.replace(/\s+/g, '-');
-  link.click();
-  showToast('JPEG downloaded!');
-}
-
-/* ── DEPLOYMENTS — SAVE & VIEW ────────────────────────────── */
-function saveDeploymentAndGo() {
-  const canvas = document.getElementById('previewCanvas');
-  const imageData = canvas.toDataURL('image/jpeg', 0.90);
-  const record = {
-    id: 'dep-' + Date.now(),
-    savedAt: new Date().toISOString(),
-    date: currentConfig.date || new Date().toISOString().split('T')[0],
-    serviceType: currentConfig.serviceType,
-    edition: currentConfig.edition || '—',
-    dept: currentConfig.dept,
-    section: currentConfig.section,
-    imageData,
-    type: 'deployment'
-  };
-  const existing = JSON.parse(localStorage.getItem('bondDeployments') || '[]');
-  existing.push(record);
-  localStorage.setItem('bondDeployments', JSON.stringify(existing));
-  closePreview();
-  showToast('Deployment saved!');
-  showPage('deployments');
-}
-function archiveOldDeployments() {
-  const allDeps = JSON.parse(localStorage.getItem('bondDeployments') || '[]');
-  const cutoff = Date.now() - DEPLOYMENT_RETENTION_DAYS * 24 * 60 * 60 * 1000;
-  const toArchive = allDeps.filter(d => d.type === 'deployment' && new Date(d.savedAt).getTime() < cutoff);
-  const toKeep = allDeps.filter(d => d.type !== 'deployment' || new Date(d.savedAt).getTime() >= cutoff);
-  if (!toArchive.length) return;
-  const groups = {};
-  toArchive.forEach(d => { const month = d.savedAt.slice(0, 7); if (!groups[month]) groups[month] = []; groups[month].push(d); });
-  Object.entries(groups).forEach(([month, deps]) => {
-    const existingIdx = toKeep.findIndex(d => d.type === 'archive' && d.month === month);
-    const archiveRecord = existingIdx > -1 ? toKeep[existingIdx] : { id: 'archive-' + month, type: 'archive', month, label: formatMonthLabel(month), deployments: [] };
-    archiveRecord.deployments.push(...deps.map(d => ({ id: d.id, savedAt: d.savedAt, date: d.date, serviceType: d.serviceType, edition: d.edition, dept: d.dept, section: d.section, imageData: d.imageData })));
-    if (existingIdx > -1) toKeep[existingIdx] = archiveRecord;
-    else toKeep.push(archiveRecord);
-  });
-  localStorage.setItem('bondDeployments', JSON.stringify(toKeep));
-}
-function formatMonthLabel(ym) {
-  const [y, m] = ym.split('-');
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  return months[parseInt(m) - 1] + ' ' + y;
-}
-function renderDeployments() {
-  const allDeps = JSON.parse(localStorage.getItem('bondDeployments') || '[]');
-  const container = document.getElementById('deploymentsContent');
-  if (!allDeps.length) {
-    container.innerHTML = `<div class="dep-empty"><div class="dep-empty-icon">📋</div><div>No deployments saved yet.</div><div style="font-size:.8rem;margin-top:8px;">Configure and deploy a service, then tap <strong>Deploy &amp; Save</strong> in the preview.</div></div>`;
-    return;
-  }
-  const individuals = allDeps.filter(d => d.type === 'deployment');
-  const archives = allDeps.filter(d => d.type === 'archive');
-  let html = '';
-  if (archives.length) {
-    html += `<div class="dep-archive-note">📦 Deployments older than ${DEPLOYMENT_RETENTION_DAYS} days are stored as monthly archives below.</div>`;
-    archives.sort((a, b) => b.month.localeCompare(a.month)).forEach(archive => {
-      html += `<div class="dep-month-group"><div class="dep-month-title">📦 Archive — ${esc(archive.label)}</div><div class="dep-grid">`;
-      archive.deployments.forEach(d => { html += depCardHtml(d, true); });
-      html += `</div></div>`;
-    });
-  }
-  if (individuals.length) {
-    const byMonth = {};
-    individuals.forEach(d => { const m = d.savedAt.slice(0, 7); if (!byMonth[m]) byMonth[m] = []; byMonth[m].push(d); });
-    Object.entries(byMonth).sort((a, b) => b[0].localeCompare(a[0])).forEach(([month, deps]) => {
-      html += `<div class="dep-month-group"><div class="dep-month-title">${formatMonthLabel(month)}</div><div class="dep-grid">`;
-      deps.sort((a, b) => b.savedAt.localeCompare(a.savedAt)).forEach(d => { html += depCardHtml(d, false); });
-      html += `</div></div>`;
-    });
-  }
-  container.innerHTML = html;
-}
-function depCardHtml(d, isArchived) {
-  return `<div class="dep-card">
-    <div class="dep-card-header"><span class="dep-card-title">${esc(d.serviceType)} ${esc(d.edition)}</span><span class="dep-card-date">${d.date || d.savedAt.slice(0,10)}</span></div>
-    <div class="dep-card-body">
-      <div class="dep-card-meta"><span>${esc(d.dept)} · ${esc(d.section)}</span><span style="font-size:.68rem;">Saved: ${new Date(d.savedAt).toLocaleString()}</span></div>
-      <img class="dep-card-img" src="${d.imageData}" alt="Deployment" onclick="openLightbox('${d.id}')"/>
-      <div class="dep-card-actions">
-        <div class="dep-action-btn" onclick="downloadDepImage('${d.id}')">⬇ Download</div>
-        ${!isArchived ? `<div class="dep-action-btn danger" onclick="deleteDeployment('${d.id}')">🗑 Delete</div>` : ''}
-      </div>
-    </div>
-  </div>`;
-}
-function deleteDeployment(id) {
-  if (!confirm('Delete this deployment record?')) return;
-  let deps = JSON.parse(localStorage.getItem('bondDeployments') || '[]');
-  deps = deps.filter(d => d.id !== id);
-  localStorage.setItem('bondDeployments', JSON.stringify(deps));
-  renderDeployments();
-  showToast('Deleted');
-}
-function downloadDepImage(id) {
-  const deps = JSON.parse(localStorage.getItem('bondDeployments') || '[]');
-  let record = deps.find(d => d.id === id);
-  if (!record) {
-    for (const d of deps) {
-      if (d.type === 'archive' && d.deployments) { const found = d.deployments.find(dd => dd.id === id); if (found) { record = found; break; } }
+    tx("users","readwrite").get(u).onsuccess=ev=>{
+      const user=ev.target.result;
+      if(!user){
+        // first time
+        tx("users","readwrite").put({
+          username:u,
+          pass:p,
+          role:u==="admin"?"admin":"user"
+        });
+        currentUser={username:u,role:u==="admin"?"admin":"user"};
+        enter();
+      }else if(user.pass===p){
+        currentUser=user;
+        enter();
+      }else{
+        tx("locks","readwrite").put({username:u});
+        loginMsg.innerText="Locked. Contact admin.";
+      }
     }
   }
-  if (!record) return;
-  const link = document.createElement('a');
-  link.href = record.imageData;
-  link.download = `deployment-${record.serviceType}-${record.date}.jpg`.replace(/\s+/g,'-');
-  link.click();
 }
 
-/* ── LIGHTBOX ─────────────────────────────────────────────── */
-function openLightbox(id) {
-  const deps = JSON.parse(localStorage.getItem('bondDeployments') || '[]');
-  let record = deps.find(d => d.id === id);
-  if (!record) {
-    for (const d of deps) {
-      if (d.type === 'archive' && d.deployments) { const found = d.deployments.find(dd => dd.id === id); if (found) { record = found; break; } }
+function enter(){
+  loginPage.classList.remove("active");
+  servicesPage.classList.add("active");
+  renderServices();
+}
+
+/* ===============================
+   SERVICES
+================================ */
+function createService(){
+  const name=prompt("Service name eg Phaneroo 572");
+  if(!name)return;
+  const id=name.toLowerCase().replace(/\s+/g,'-');
+  tx("services","readwrite").put({id,name});
+  renderServices();
+}
+
+function renderServices(){
+  const el=serviceList;
+  el.innerHTML="";
+  tx("services").openCursor().onsuccess=e=>{
+    const c=e.target.result;
+    if(c){
+      const d=c.value;
+      const div=document.createElement("div");
+      div.className="item";
+      div.innerHTML=`${d.name}
+      <button onclick="openService('${d.id}')">Open</button>`;
+      if(currentUser.role==="admin"){
+        div.innerHTML+=` <button class="secondary" onclick="adminService('${d.id}')">Admin</button>`;
+      }
+      el.appendChild(div);
+      c.continue();
     }
-  }
-  if (!record) return;
-  document.getElementById('lightboxImg').src = record.imageData;
-  document.getElementById('lightbox').classList.add('open');
-}
-function closeLightbox() { document.getElementById('lightbox').classList.remove('open'); }
-
-/* ── ZONE ACTIONS ─────────────────────────────────────────── */
-function clearZones() {
-  if (!confirm('Return all agents to pool?')) return;
-  activeZones.forEach(z => { (za.zones[z] || []).forEach(id => { if (!za.pool.includes(id)) za.pool.push(id); }); za.zones[z] = []; });
-  renderAll(); showToast('Zones cleared');
-}
-function resetAll() {
-  if (!confirm('Reset everything? This clears zones and pool (agents remain in roster).')) return;
-  activeZones.forEach(z => za.zones[z] = []);
-  za.pool = [...Object.keys(agents)];
-  renderAll(); showToast('Reset complete');
-}
-
-/* ══════════════════════════════════════════════════════════
- * WEEKLY REPORT — Tab switching
- * ══════════════════════════════════════════════════════════ */
-function switchReportTab(tab, btn) {
-  document.querySelectorAll('.report-tab-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.report-tab-panel').forEach(p => p.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('rptTab-' + tab).classList.add('active');
-}
-
-function clearReport() {
-  if (!confirm('Clear all report fields?')) return;
-  const ids = [
-    'rpt_week','rpt_compiled_by','rpt_reviewed_by',
-    'thu_objectives','thu_observations','thu_challenges','thu_recommendations',
-    'thu_incidents','thu_ministers','thu_police','thu_reflectors','thu_tags',
-    'thu_walkies','thu_cars','thu_bags','thu_other_materials',
-    'sun_objectives','sun_observations','sun_challenges','sun_recommendations',
-    'sun_incidents','sun_ministers','sun_police','sun_reflectors','sun_tags',
-    'sun_walkies','sun_cars','sun_bags','sun_other_materials',
-    'rpt_sign_compiled','rpt_sign_reviewed'
-  ];
-  ids.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-  showToast('Report cleared');
-}
-
-/* ══════════════════════════════════════════════════════════
- * WEEKLY REPORT — Download .docx
- * Uses docx library loaded from CDN
- * ══════════════════════════════════════════════════════════ */
-async function downloadReport() {
-  if (typeof docx === 'undefined') { showToast('Word library not loaded yet — please wait'); return; }
-
-  const {
-    Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
-    Header, ImageRun, BorderStyle, WidthType, ShadingType
-  } = docx;
-
-  // Collect values helper
-  const g = id => (document.getElementById(id)?.value || '').trim() || '—';
-
-  const week     = g('rpt_week');
-  const compiled = g('rpt_compiled_by');
-  const reviewed = g('rpt_reviewed_by');
-  const signC    = g('rpt_sign_compiled');
-  const signR    = g('rpt_sign_reviewed');
-
-  const thu = {
-    objectives:      g('thu_objectives'),
-    observations:    g('thu_observations'),
-    challenges:      g('thu_challenges'),
-    recommendations: g('thu_recommendations'),
-    incidents:       g('thu_incidents'),
-    ministers:       g('thu_ministers'),
-    police:          g('thu_police'),
-    reflectors:      g('thu_reflectors'),
-    tags:            g('thu_tags'),
-    walkies:         g('thu_walkies'),
-    cars:            g('thu_cars'),
-    bags:            g('thu_bags'),
-    other:           g('thu_other_materials'),
   };
-  const sun = {
-    objectives:      g('sun_objectives'),
-    observations:    g('sun_observations'),
-    challenges:      g('sun_challenges'),
-    recommendations: g('sun_recommendations'),
-    incidents:       g('sun_incidents'),
-    ministers:       g('sun_ministers'),
-    police:          g('sun_police'),
-    reflectors:      g('sun_reflectors'),
-    tags:            g('sun_tags'),
-    walkies:         g('sun_walkies'),
-    cars:            g('sun_cars'),
-    bags:            g('sun_bags'),
-    other:           g('sun_other_materials'),
+  adminCreateBtn.style.display=currentUser.role==="admin"?"block":"none";
+}
+
+let activeService=null;
+
+/* ===============================
+   SUBMISSIONS
+================================ */
+function openService(id){
+  activeService=id;
+  submitTitle.innerText=id.toUpperCase();
+  submitPage.classList.add("active");
+  servicesPage.classList.remove("active");
+
+  tx("submissions").get([id,currentUser.username]).onsuccess=e=>{
+    reportText.value=e.target.result?.text||"";
   };
+}
 
-  // Shared styles
-  const ORANGE  = 'D4700A';
-  const GREEN   = '5A9E1A';
-  const DARK    = '1F2937';
-  const LIGHT   = 'E8F5D0';
-  const TW      = 9360;
-  const BORDER  = { style: BorderStyle.SINGLE, size: 1, color: 'CCCCCC' };
-  const BORDERS = { top: BORDER, bottom: BORDER, left: BORDER, right: BORDER };
-
-  // Header PNG (Phaneroo banner, appears on every page)
-  const HEADER_B64 = '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';
-  function b64ToUint8(b64) {
-    const bin = atob(b64);
-    const arr = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
-    return arr;
-  }
-  const headerImgData = b64ToUint8(HEADER_B64);
-
-  // Helpers
-  const labelRun = txt => new TextRun({ text: txt, bold: true, color: ORANGE, size: 20, font: 'Arial' });
-  const normalRun = txt => new TextRun({ text: txt, size: 20, font: 'Arial', color: DARK });
-
-  const kvRow = (label, value) => new TableRow({
-    children: [
-      new TableCell({
-        borders: BORDERS,
-        width: { size: 2600, type: WidthType.DXA },
-        shading: { fill: LIGHT, type: ShadingType.CLEAR },
-        margins: { top: 80, bottom: 80, left: 140, right: 100 },
-        children: [new Paragraph({ children: [labelRun(label)] })]
-      }),
-      new TableCell({
-        borders: BORDERS,
-        width: { size: TW - 2600, type: WidthType.DXA },
-        margins: { top: 80, bottom: 80, left: 140, right: 120 },
-        children: [new Paragraph({ children: [normalRun(value)] })]
-      }),
-    ]
+function saveSubmission(){
+  tx("submissions","readwrite").put({
+    serviceId:activeService,
+    username:currentUser.username,
+    text:reportText.value,
+    time:new Date().toISOString()
   });
+  alert("Saved");
+}
 
-  const fullRow = (text) => new TableRow({
-    children: [new TableCell({
-      borders: BORDERS,
-      width: { size: TW, type: WidthType.DXA },
-      margins: { top: 100, bottom: 100, left: 140, right: 140 },
-      children: [new Paragraph({ children: [normalRun(text)] })]
-    })]
-  });
+/* ===============================
+   ADMIN VIEW
+================================ */
+function adminService(id){
+  activeService=id;
+  adminTitle.innerText="Submissions – "+id;
+  adminSubmissions.innerHTML="";
+  adminPage.classList.add("active");
+  servicesPage.classList.remove("active");
 
-  const sectionHead = (txt, color = ORANGE) => new Paragraph({
-    spacing: { before: 240, after: 80 },
-    children: [new TextRun({ text: txt, bold: true, size: 24, color, font: 'Arial' })]
-  });
-
-  const keyAreasTable = (data) => new Table({
-    width: { size: TW, type: WidthType.DXA },
-    columnWidths: [2600, TW - 2600],
-    rows: [
-      kvRow('Objectives / Intended Outcomes', data.objectives),
-      kvRow('Key Observations',               data.observations),
-      kvRow('Implementation Challenges',      data.challenges),
-      kvRow('Key Recommendations',            data.recommendations),
-    ]
-  });
-
-  const incidencesTable = (data) => new Table({
-    width: { size: TW, type: WidthType.DXA },
-    columnWidths: [TW],
-    rows: [fullRow(data.incidents)]
-  });
-
-  const materialsTable = (data) => {
-    const lines = [
-      `Number of Ministers who served: ${data.ministers}`,
-      `Number of Police and Army: ${data.police}`,
-      `Number of Reflectors given: ${data.reflectors}`,
-      `Number of Tags dispatched: ${data.tags}`,
-      `Number of Walkie Talkies: ${data.walkies}`,
-      `Number of Cars Parked: ${data.cars}`,
-      `Number of Bags: ${data.bags}`,
-      (data.other && data.other !== '—') ? `Other: ${data.other}` : null,
-    ].filter(Boolean).join('     ');
-    return new Table({
-      width: { size: TW, type: WidthType.DXA },
-      columnWidths: [TW],
-      rows: [fullRow(lines)]
-    });
+  tx("users").openCursor().onsuccess=e=>{
+    const c=e.target.result;
+    if(c){
+      const u=c.value.username;
+      if(u!=="admin"){
+        tx("submissions").get([id,u]).onsuccess=ev=>{
+          const sub=ev.target.result;
+          const div=document.createElement("div");
+          div.className="item";
+          div.innerHTML=`${u} – ${
+            sub?'<span class="badge ok">Submitted</span>'
+                :'<span class="badge wait">Pending</span>'
+          }`;
+          adminSubmissions.appendChild(div);
+        };
+      }
+      c.continue();
+    }
   };
-
-  const doc = new Document({
-    styles: { default: { document: { run: { font: 'Arial', size: 20 } } } },
-    sections: [{
-      properties: {
-        page: {
-          size: { width: 12240, height: 15840 },
-          margin: { top: 1440, right: 1080, bottom: 1080, left: 1080 }
-        }
-      },
-      headers: {
-        default: new Header({
-          children: [
-            new Paragraph({
-              spacing: { before: 0, after: 60 },
-              children: [new ImageRun({
-                type: 'png',
-                data: headerImgData,
-                transformation: { width: 650, height: 60 },
-                altText: { title: 'Phaneroo', description: 'Phaneroo Ministries International', name: 'ph-header' }
-              })]
-            })
-          ]
-        })
-      },
-      children: [
-        // ── Report title ──
-        new Paragraph({
-          spacing: { before: 0, after: 100 },
-          children: [new TextRun({ text: 'SECURITY WEEKLY REPORT', bold: true, size: 36, color: DARK, font: 'Arial' })]
-        }),
-        new Paragraph({
-          spacing: { before: 0, after: 40 },
-          children: [new TextRun({ text: 'This report captures the Objectives and intended outcomes of ministration, the implementation challenges and key recommendations to improve ministration.', size: 18, color: '6B7280', font: 'Arial', italics: true })]
-        }),
-        new Paragraph({
-          spacing: { before: 120, after: 60 },
-          children: [
-            new TextRun({ text: 'Week of: ', bold: true, size: 20, font: 'Arial', color: DARK }),
-            new TextRun({ text: week + '     ', size: 20, font: 'Arial', color: DARK }),
-            new TextRun({ text: 'Compiled by: ', bold: true, size: 20, font: 'Arial', color: DARK }),
-            new TextRun({ text: compiled, size: 20, font: 'Arial', color: DARK }),
-          ]
-        }),
-
-        // ── THURSDAY ──
-        sectionHead('THURSDAY SERVICE', GREEN),
-        keyAreasTable(thu),
-        sectionHead('Incidences that occurred'),
-        incidencesTable(thu),
-        sectionHead('Other details important to note: (like materials taken, number of cars parked, number of bags etc)'),
-        materialsTable(thu),
-
-        new Paragraph({ spacing: { before: 220, after: 0 }, children: [] }),
-
-        // ── SUNDAY ──
-        sectionHead('SUNDAY SERVICE', GREEN),
-        keyAreasTable(sun),
-        sectionHead('Incidences that occurred'),
-        incidencesTable(sun),
-        sectionHead('Other details important to note: (like materials taken, number of cars parked, number of bags etc)'),
-        materialsTable(sun),
-
-        new Paragraph({ spacing: { before: 260, after: 0 }, children: [] }),
-
-        // ── Signatures ──
-        new Paragraph({
-          spacing: { before: 0, after: 0 },
-          children: [
-            new TextRun({ text: 'Compiled by: ', bold: true, size: 20, font: 'Arial', color: DARK }),
-            new TextRun({ text: (signC !== '—' ? signC : '_______________________') + '          ', size: 20, font: 'Arial', color: DARK }),
-            new TextRun({ text: 'Reviewed and signed by: ', bold: true, size: 20, font: 'Arial', color: DARK }),
-            new TextRun({ text: signR !== '—' ? signR : '_______________________', size: 20, font: 'Arial', color: DARK }),
-          ]
-        }),
-      ]
-    }]
-  });
-
-  try {
-    const buffer = await docx.Packer.toBlob(doc);
-    const url = URL.createObjectURL(buffer);
-    const link = document.createElement('a');
-    link.href = url;
-    const dateStr = week !== '—' ? week : new Date().toISOString().split('T')[0];
-    link.download = `Security-Weekly-Report-${dateStr}.docx`;
-    link.click();
-    URL.revokeObjectURL(url);
-    showToast('Report downloaded!');
-  } catch (err) {
-    console.error(err);
-    showToast('Error generating report: ' + err.message);
-  }
 }
 
-/* ── UTILITIES ────────────────────────────────────────────── */
-function esc(s) {
-  const m = { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' };
-  return String(s || '').replace(/[&<>"']/g, c => m[c]);
-}
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
+/* ===============================
+   NAV
+================================ */
+function goBack(){
+  submitPage.classList.remove("active");
+  adminPage.classList.remove("active");
+  servicesPage.classList.add("active");
 }
 
-/* ── INIT ─────────────────────────────────────────────────── */
-(function init() {
-  initLogos();
-  loadAgents();
-  const today = new Date().toISOString().split('T')[0];
-  document.getElementById('configDate').value = today;
-  document.getElementById('rpt_week').value = today;
-  currentConfig.date = today;
-  initConfigPage();
-  renderAll();
-  archiveOldDeployments();
-})();
+/* ===============================
+   JPEG TITLE FIX
+================================ */
+// ANY canvas preview should now use:
+function drawDeploymentTitle(ctx,w){
+  ctx.font="bold 32px Arial";
+  ctx.textAlign="center";
+  ctx.fillText("DEPLOYMENT",w/2,52);
+}
 </script>
+
 </body>
 </html>
