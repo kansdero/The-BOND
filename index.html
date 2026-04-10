@@ -1,232 +1,137 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>BOND Space</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <title>BOND Space</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
 
-<style>
-body{font-family:Arial, sans-serif;margin:0;background:#f3f4f6;color:#1f2937}
-.page{display:none;padding:20px}
-.page.active{display:block}
-.card{background:white;padding:20px;border-radius:10px;max-width:420px;margin:40px auto;box-shadow:0 5px 20px rgba(0,0,0,.08)}
-input,button,select,textarea{width:100%;padding:10px;margin-top:10px}
-button{background:#5a9e1a;color:white;border:none;border-radius:6px;font-weight:bold;cursor:pointer}
-button.secondary{background:#d4700a}
-.list{max-width:700px;margin:auto}
-.item{background:white;padding:14px;margin-bottom:10px;border-radius:8px}
-.badge{font-size:12px;padding:3px 8px;border-radius:20px}
-.ok{background:#16a34a;color:white}
-.wait{background:#eab308;color:black}
-.lock{background:#dc2626;color:white}
-.admin{color:#d4700a;font-weight:bold}
-</style>
+  <!-- PWA -->
+  <meta name="theme-color" content="#5a9e1a">
+  <link rel="manifest" href="manifest.json">
+
+  <style>
+    body{margin:0;font-family:Arial,sans-serif;background:#f3f4f6}
+    .page{display:none;padding:20px}
+    .page.active{display:block}
+    .card{background:#fff;padding:20px;border-radius:10px;max-width:420px;margin:40px auto;box-shadow:0 6px 20px rgba(0,0,0,.1)}
+    input,button{width:100%;padding:10px;margin-top:10px}
+    button{background:#5a9e1a;color:#fff;border:none;border-radius:6px;font-weight:bold}
+    button.secondary{background:#d4700a}
+    .item{background:white;padding:12px;border-radius:8px;margin-bottom:10px}
+    iframe{border:none;width:100%;height:100vh}
+  </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
-<div class="page active" id="loginPage">
+<!-- ================= LOGIN ================= -->
+<div id="authPage" class="page active">
   <div class="card">
     <h2>Login</h2>
-    <input id="loginUser" placeholder="username">
-    <input id="loginPass" type="password" placeholder="password (codename)">
+    <input id="authUser" placeholder="username (admin / unithead)">
+    <input id="authPass" type="password" placeholder="password (codename)">
     <button onclick="login()">Login</button>
-    <div id="loginMsg"></div>
+    <div id="authMsg"></div>
   </div>
 </div>
 
-<!-- SERVICE LIST -->
-<div class="page" id="servicesPage">
-  <h2>Services</h2>
-  <div class="list" id="serviceList"></div>
-  <button onclick="createService()" class="admin" id="adminCreateBtn">+ Create Service</button>
+<!-- ================= SERVICES ================= -->
+<div id="servicesPage" class="page">
+  <h2 style="text-align:center">Services</h2>
+  <div id="servicesList" style="max-width:500px;margin:auto"></div>
+  <div style="max-width:500px;margin:auto">
+    <button onclick="newService()">+ Create Service</button>
+  </div>
 </div>
 
-<!-- SUBMISSION -->
-<div class="page" id="submitPage">
-  <h2 id="submitTitle"></h2>
-  <textarea id="reportText" placeholder="Enter report..."></textarea>
-  <button onclick="saveSubmission()">Save</button>
-  <button class="secondary" onclick="goBack()">Back</button>
-</div>
-
-<!-- ADMIN VIEW -->
-<div class="page" id="adminPage">
-  <h2 id="adminTitle"></h2>
-  <div class="list" id="adminSubmissions"></div>
-  <button class="secondary" onclick="goBack()">Back</button>
+<!-- ================= APP LOADER ================= -->
+<div id="appPage" class="page">
+  <!-- Your original app lives here -->
+  <iframe src="app.html"></iframe>
 </div>
 
 <script>
-/* ===============================
-   DATABASE (IndexedDB)
-================================ */
-let db;
-const req = indexedDB.open("bondSpaceDB", 1);
-
-req.onupgradeneeded = e => {
-  db = e.target.result;
-  db.createObjectStore("users",{keyPath:"username"});
-  db.createObjectStore("services",{keyPath:"id"});
-  db.createObjectStore("submissions",{keyPath:["serviceId","username"]});
-  db.createObjectStore("locks",{keyPath:"username"});
-};
-
-req.onsuccess = e => { db = e.target.result; };
-
-function tx(store,mode="readonly"){return db.transaction(store,mode).objectStore(store);}
-
-/* ===============================
-   AUTH
-================================ */
-let currentUser=null;
+/* ================= USERS ================= */
+let currentUser = null;
+let currentService = null;
 
 function login(){
-  const u=loginUser.value.trim();
-  const p=loginPass.value.trim();
-  if(!u||!p) return;
+  const u = authUser.value.trim();
+  const p = authPass.value.trim();
+  if(!u || !p) return;
 
-  tx("locks").get(u).onsuccess=e=>{
-    if(e.target.result){
-      loginMsg.innerText="Account locked. Contact admin.";
-      return;
-    }
+  const users = JSON.parse(localStorage.getItem("users") || "{}");
 
-    tx("users","readwrite").get(u).onsuccess=ev=>{
-      const user=ev.target.result;
-      if(!user){
-        // first time
-        tx("users","readwrite").put({
-          username:u,
-          pass:p,
-          role:u==="admin"?"admin":"user"
-        });
-        currentUser={username:u,role:u==="admin"?"admin":"user"};
-        enter();
-      }else if(user.pass===p){
-        currentUser=user;
-        enter();
-      }else{
-        tx("locks","readwrite").put({username:u});
-        loginMsg.innerText="Locked. Contact admin.";
-      }
-    }
+  if(!users[u]){
+    users[u] = { password:p, role:u==="admin"?"admin":"user", locked:false };
+    localStorage.setItem("users", JSON.stringify(users));
   }
-}
 
-function enter(){
-  loginPage.classList.remove("active");
+  if(users[u].locked){
+    authMsg.innerText = "Account locked. Contact admin.";
+    return;
+  }
+
+  if(users[u].password !== p){
+    users[u].locked = true;
+    localStorage.setItem("users", JSON.stringify(users));
+    authMsg.innerText = "Wrong password. Account locked.";
+    return;
+  }
+
+  currentUser = u;
+  authPage.classList.remove("active");
   servicesPage.classList.add("active");
   renderServices();
 }
 
-/* ===============================
-   SERVICES
-================================ */
-function createService(){
-  const name=prompt("Service name eg Phaneroo 572");
-  if(!name)return;
-  const id=name.toLowerCase().replace(/\s+/g,'-');
-  tx("services","readwrite").put({id,name});
+/* ================= SERVICES ================= */
+function newService(){
+  const name = prompt("Service name e.g. Phaneroo 572");
+  if(!name) return;
+  const id = name.toLowerCase().replace(/\s+/g,"-");
+
+  const services = JSON.parse(localStorage.getItem("services") || "[]");
+  services.push({ id, name, created:new Date().toISOString() });
+  localStorage.setItem("services", JSON.stringify(services));
   renderServices();
 }
 
 function renderServices(){
-  const el=serviceList;
-  el.innerHTML="";
-  tx("services").openCursor().onsuccess=e=>{
-    const c=e.target.result;
-    if(c){
-      const d=c.value;
-      const div=document.createElement("div");
-      div.className="item";
-      div.innerHTML=`${d.name}
-      <button onclick="openService('${d.id}')">Open</button>`;
-      if(currentUser.role==="admin"){
-        div.innerHTML+=` <button class="secondary" onclick="adminService('${d.id}')">Admin</button>`;
-      }
-      el.appendChild(div);
-      c.continue();
-    }
-  };
-  adminCreateBtn.style.display=currentUser.role==="admin"?"block":"none";
-}
+  servicesList.innerHTML = "";
+  const services = JSON.parse(localStorage.getItem("services") || "[]");
 
-let activeService=null;
-
-/* ===============================
-   SUBMISSIONS
-================================ */
-function openService(id){
-  activeService=id;
-  submitTitle.innerText=id.toUpperCase();
-  submitPage.classList.add("active");
-  servicesPage.classList.remove("active");
-
-  tx("submissions").get([id,currentUser.username]).onsuccess=e=>{
-    reportText.value=e.target.result?.text||"";
-  };
-}
-
-function saveSubmission(){
-  tx("submissions","readwrite").put({
-    serviceId:activeService,
-    username:currentUser.username,
-    text:reportText.value,
-    time:new Date().toISOString()
+  services.forEach(s=>{
+    const div = document.createElement("div");
+    div.className = "item";
+    div.innerHTML = `
+      <strong>${s.name}</strong><br>
+      <small>${new Date(s.created).toLocaleString()}</small><br><br>
+      <button onclick="openService('${s.id}')">Open</button>
+    `;
+    servicesList.appendChild(div);
   });
-  alert("Saved");
 }
 
-/* ===============================
-   ADMIN VIEW
-================================ */
-function adminService(id){
-  activeService=id;
-  adminTitle.innerText="Submissions – "+id;
-  adminSubmissions.innerHTML="";
-  adminPage.classList.add("active");
+function openService(id){
+  currentService = id;
   servicesPage.classList.remove("active");
+  appPage.classList.add("active");
 
-  tx("users").openCursor().onsuccess=e=>{
-    const c=e.target.result;
-    if(c){
-      const u=c.value.username;
-      if(u!=="admin"){
-        tx("submissions").get([id,u]).onsuccess=ev=>{
-          const sub=ev.target.result;
-          const div=document.createElement("div");
-          div.className="item";
-          div.innerHTML=`${u} – ${
-            sub?'<span class="badge ok">Submitted</span>'
-                :'<span class="badge wait">Pending</span>'
-          }`;
-          adminSubmissions.appendChild(div);
-        };
-      }
-      c.continue();
-    }
-  };
+  // Store active service globally
+  localStorage.setItem("activeService", id);
 }
 
-/* ===============================
-   NAV
-================================ */
-function goBack(){
-  submitPage.classList.remove("active");
-  adminPage.classList.remove("active");
-  servicesPage.classList.add("active");
-}
-
-/* ===============================
-   JPEG TITLE FIX
-================================ */
-// ANY canvas preview should now use:
-function drawDeploymentTitle(ctx,w){
+/* ================= JPEG TITLE FIX ================= */
+window.drawDeploymentTitle = function(ctx,w){
   ctx.font="bold 32px Arial";
   ctx.textAlign="center";
-  ctx.fillText("DEPLOYMENT",w/2,52);
+  ctx.fillText("DEPLOYMENT", w/2, 52);
+};
+
+/* ================= PWA ================= */
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("sw.js");
 }
 </script>
 
