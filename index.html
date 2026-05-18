@@ -4,136 +4,543 @@
   <meta charset="UTF-8" />
   <title>BOND Space</title>
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-
-  <!-- PWA -->
-  <meta name="theme-color" content="#5a9e1a">
+  <meta name="theme-color" content="#1a1a1a">
   <link rel="manifest" href="manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 
   <style>
-    body{margin:0;font-family:Arial,sans-serif;background:#f3f4f6}
-    .page{display:none;padding:20px}
-    .page.active{display:block}
-    .card{background:#fff;padding:20px;border-radius:10px;max-width:420px;margin:40px auto;box-shadow:0 6px 20px rgba(0,0,0,.1)}
-    input,button{width:100%;padding:10px;margin-top:10px}
-    button{background:#5a9e1a;color:#fff;border:none;border-radius:6px;font-weight:bold}
-    button.secondary{background:#d4700a}
-    .item{background:white;padding:12px;border-radius:8px;margin-bottom:10px}
-    iframe{border:none;width:100%;height:100vh}
+    :root {
+      --green: #5a9e1a;
+      --green-dark: #3f7010;
+      --orange: #d4700a;
+      --bg: #111;
+      --surface: #1e1e1e;
+      --surface2: #2a2a2a;
+      --border: #333;
+      --text: #f0f0f0;
+      --muted: #888;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── PAGES ── */
+    .page { display: none; min-height: 100vh; }
+    .page.active { display: flex; flex-direction: column; }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .topbar-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px;
+      letter-spacing: 2px;
+      color: var(--green);
+    }
+    .topbar-back {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 22px;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 6px;
+      transition: color .2s;
+    }
+    .topbar-back:hover { color: var(--text); }
+
+    /* ── HOME PAGE ── */
+    #homePage .hero {
+      padding: 40px 24px 20px;
+      text-align: center;
+    }
+    #homePage .hero-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 64px;
+      letter-spacing: 6px;
+      line-height: 1;
+      color: var(--green);
+      text-shadow: 0 0 40px rgba(90,158,26,0.3);
+    }
+    #homePage .hero-sub {
+      font-size: 13px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+    .home-divider {
+      width: 40px;
+      height: 2px;
+      background: var(--orange);
+      margin: 24px auto;
+    }
+
+    .services-container {
+      flex: 1;
+      padding: 0 20px 100px;
+      max-width: 560px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .services-label {
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    .service-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 18px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      cursor: pointer;
+      transition: border-color .2s, background .2s;
+    }
+    .service-card:hover {
+      border-color: var(--green);
+      background: #232323;
+    }
+    .service-card-info strong {
+      font-size: 15px;
+      font-weight: 600;
+      display: block;
+    }
+    .service-card-info small {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+      display: block;
+    }
+    .service-card-arrow {
+      color: var(--green);
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 50px 20px;
+      color: var(--muted);
+    }
+    .empty-state .empty-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+      opacity: .4;
+    }
+    .empty-state p {
+      font-size: 14px;
+    }
+
+    /* ── FAB ── */
+    .fab {
+      position: fixed;
+      bottom: 28px;
+      right: 24px;
+      background: var(--green);
+      color: #fff;
+      border: none;
+      border-radius: 50px;
+      padding: 14px 22px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 6px 24px rgba(90,158,26,0.4);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background .2s, transform .15s;
+      z-index: 20;
+    }
+    .fab:hover { background: var(--green-dark); transform: translateY(-2px); }
+    .fab:active { transform: translateY(0); }
+
+    /* ── SERVICE DETAIL (Page 2) ── */
+    #detailPage .content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+      text-align: center;
+      gap: 14px;
+      max-width: 420px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .detail-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 38px;
+      letter-spacing: 3px;
+      color: var(--green);
+    }
+    .detail-date {
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .detail-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+      margin-top: 16px;
+    }
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: opacity .2s, transform .15s;
+    }
+    .btn:active { transform: scale(.98); }
+    .btn-primary { background: var(--green); color: #fff; }
+    .btn-secondary { background: var(--orange); color: #fff; }
+    .btn-outline {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-outline:hover { border-color: var(--muted); }
+    .btn-danger {
+      background: transparent;
+      color: #e55;
+      border: 1px solid #442;
+      font-size: 13px;
+    }
+
+    /* ── APP IFRAME (Page 3) ── */
+    #appPage { background: #000; }
+    #appPage iframe {
+      flex: 1;
+      border: none;
+      width: 100%;
+      height: calc(100vh - 54px);
+    }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--surface2);
+      color: var(--text);
+      padding: 10px 20px;
+      border-radius: 30px;
+      font-size: 13px;
+      border: 1px solid var(--border);
+      opacity: 0;
+      transition: opacity .3s, transform .3s;
+      pointer-events: none;
+      z-index: 100;
+      white-space: nowrap;
+    }
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.75);
+      z-index: 50;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--surface);
+      border-radius: 16px 16px 0 0;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      width: 100%;
+      max-width: 560px;
+      padding: 28px 24px 40px;
+      animation: slideUp .25s ease;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(30px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+    .modal h3 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 24px;
+      letter-spacing: 2px;
+      margin-bottom: 18px;
+      color: var(--green);
+    }
+    .modal input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      padding: 12px 14px;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .modal input:focus { border-color: var(--green); }
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .modal-actions .btn { flex: 1; }
   </style>
 </head>
-
 <body>
 
-<!-- ================= LOGIN ================= -->
-<div id="authPage" class="page active">
-  <div class="card">
-    <h2>Login</h2>
-    <input id="authUser" placeholder="username (admin / unithead)">
-    <input id="authPass" type="password" placeholder="password (codename)">
-    <button onclick="login()">Login</button>
-    <div id="authMsg"></div>
+<!-- ═══════════════════════════════ PAGE 1: HOME ═══════════════════════════════ -->
+<div id="homePage" class="page active">
+
+  <div class="hero">
+    <div class="hero-logo">BOND</div>
+    <div class="hero-sub">Parking Security · Deployments</div>
+    <div class="home-divider"></div>
   </div>
+
+  <div class="services-container">
+    <div class="services-label">Services</div>
+    <div id="servicesList"></div>
+  </div>
+
+  <button class="fab" onclick="openNewServiceModal()">
+    <span>＋</span> New Service
+  </button>
 </div>
 
-<!-- ================= SERVICES ================= -->
-<div id="servicesPage" class="page">
-  <h2 style="text-align:center">Services</h2>
-  <div id="servicesList" style="max-width:500px;margin:auto"></div>
-  <div style="max-width:500px;margin:auto">
-    <button onclick="newService()">+ Create Service</button>
+<!-- ═══════════════════════════════ PAGE 2: SERVICE DETAIL ═══════════════════════════════ -->
+<div id="detailPage" class="page">
+
+  <div class="topbar">
+    <button class="topbar-back" onclick="goHome()">&#8592;</button>
+    <span class="topbar-title" id="detailTitle">SERVICE</span>
+    <span style="width:38px"></span>
   </div>
+
+  <div class="content">
+    <div class="detail-name" id="detailName"></div>
+    <div class="detail-date" id="detailDate"></div>
+
+    <div class="detail-actions">
+      <button class="btn btn-primary" onclick="openDeployment()">
+        📋 Create / Edit Deployment
+      </button>
+      <button class="btn btn-secondary" onclick="previewDeployment()">
+        👁 Preview Deployment
+      </button>
+      <button class="btn btn-outline" onclick="downloadDeployment()">
+        ⬇ Download as Image
+      </button>
+      <button class="btn btn-danger" onclick="deleteService()">
+        🗑 Delete Service
+      </button>
+    </div>
+  </div>
+
 </div>
 
-<!-- ================= APP LOADER ================= -->
+<!-- ═══════════════════════════════ PAGE 3: APP (iframe) ═══════════════════════════════ -->
 <div id="appPage" class="page">
-  <!-- Your original app lives here -->
-  <iframe src="app.html"></iframe>
+
+  <div class="topbar">
+    <button class="topbar-back" onclick="goDetail()">&#8592;</button>
+    <span class="topbar-title" id="appTitle">DEPLOYMENT</span>
+    <span style="width:38px"></span>
+  </div>
+
+  <iframe id="appFrame" src=""></iframe>
+
 </div>
+
+<!-- ═══════════════════════════════ NEW SERVICE MODAL ═══════════════════════════════ -->
+<div id="newServiceModal" class="modal-overlay" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <h3>New Service</h3>
+    <input id="serviceNameInput" placeholder="e.g. Phaneroo 572" maxlength="60"
+           onkeydown="if(event.key==='Enter') createService()">
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="createService()">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ TOAST ═══════════════════════════════ -->
+<div id="toast"></div>
 
 <script>
-/* ================= USERS ================= */
-let currentUser = null;
-let currentService = null;
+  /* ─── STATE ─── */
+  let currentService = null;
 
-function login(){
-  const u = authUser.value.trim();
-  const p = authPass.value.trim();
-  if(!u || !p) return;
-
-  const users = JSON.parse(localStorage.getItem("users") || "{}");
-
-  if(!users[u]){
-    users[u] = { password:p, role:u==="admin"?"admin":"user", locked:false };
-    localStorage.setItem("users", JSON.stringify(users));
+  /* ─── PAGES ─── */
+  function showPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo(0, 0);
   }
 
-  if(users[u].locked){
-    authMsg.innerText = "Account locked. Contact admin.";
-    return;
+  function goHome()   { showPage('homePage'); renderServices(); }
+  function goDetail() { showPage('detailPage'); }
+
+  /* ─── SERVICES ─── */
+  function getServices() {
+    return JSON.parse(localStorage.getItem('bond_services') || '[]');
+  }
+  function saveServices(arr) {
+    localStorage.setItem('bond_services', JSON.stringify(arr));
   }
 
-  if(users[u].password !== p){
-    users[u].locked = true;
-    localStorage.setItem("users", JSON.stringify(users));
-    authMsg.innerText = "Wrong password. Account locked.";
-    return;
+  function renderServices() {
+    const list = document.getElementById('servicesList');
+    const services = getServices();
+
+    if (!services.length) {
+      list.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">🅿️</div>
+          <p>No services yet.<br>Tap <strong>+ New Service</strong> to get started.</p>
+        </div>`;
+      return;
+    }
+
+    list.innerHTML = services.slice().reverse().map(s => `
+      <div class="service-card" onclick="openDetail('${s.id}')">
+        <div class="service-card-info">
+          <strong>${s.name}</strong>
+          <small>${new Date(s.created).toLocaleDateString('en-ZA',{weekday:'short',day:'numeric',month:'short',year:'numeric'})}</small>
+        </div>
+        <span class="service-card-arrow">›</span>
+      </div>
+    `).join('');
   }
 
-  currentUser = u;
-  authPage.classList.remove("active");
-  servicesPage.classList.add("active");
+  function openDetail(id) {
+    const s = getServices().find(x => x.id === id);
+    if (!s) return;
+    currentService = s;
+    localStorage.setItem('activeService', id);
+
+    document.getElementById('detailTitle').textContent = s.name.toUpperCase();
+    document.getElementById('detailName').textContent  = s.name;
+    document.getElementById('detailDate').textContent  =
+      'Created ' + new Date(s.created).toLocaleDateString('en-ZA',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+    showPage('detailPage');
+  }
+
+  function openDeployment() {
+    document.getElementById('appTitle').textContent =
+      (currentService?.name || 'Deployment').toUpperCase();
+    document.getElementById('appFrame').src = 'app.html?service=' + currentService.id;
+    showPage('appPage');
+  }
+
+  function previewDeployment() {
+    // Opens app.html in preview/read-only mode (app.html can read ?mode=preview)
+    document.getElementById('appTitle').textContent = 'PREVIEW';
+    document.getElementById('appFrame').src = 'app.html?service=' + currentService.id + '&mode=preview';
+    showPage('appPage');
+  }
+
+  function downloadDeployment() {
+    // Delegates to app.html — the iframe triggers its own download/export logic
+    document.getElementById('appTitle').textContent = 'DOWNLOAD';
+    document.getElementById('appFrame').src = 'app.html?service=' + currentService.id + '&mode=download';
+    showPage('appPage');
+  }
+
+  function deleteService() {
+    if (!confirm(`Delete "${currentService.name}"? This cannot be undone.`)) return;
+    const services = getServices().filter(s => s.id !== currentService.id);
+    saveServices(services);
+    toast('Service deleted');
+    goHome();
+  }
+
+  /* ─── MODAL ─── */
+  function openNewServiceModal() {
+    document.getElementById('serviceNameInput').value = '';
+    document.getElementById('newServiceModal').classList.add('open');
+    setTimeout(() => document.getElementById('serviceNameInput').focus(), 200);
+  }
+  function closeModal() {
+    document.getElementById('newServiceModal').classList.remove('open');
+  }
+  function closeModalOutside(e) {
+    if (e.target === document.getElementById('newServiceModal')) closeModal();
+  }
+
+  function createService() {
+    const name = document.getElementById('serviceNameInput').value.trim();
+    if (!name) return;
+
+    const id = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') + '-' + Date.now();
+    const services = getServices();
+    services.push({ id, name, created: new Date().toISOString() });
+    saveServices(services);
+
+    closeModal();
+    toast('Service created');
+    renderServices();
+    // Auto-open the new service
+    openDetail(id);
+  }
+
+  /* ─── TOAST ─── */
+  function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 2500);
+  }
+
+  /* ─── INIT ─── */
   renderServices();
-}
 
-/* ================= SERVICES ================= */
-function newService(){
-  const name = prompt("Service name e.g. Phaneroo 572");
-  if(!name) return;
-  const id = name.toLowerCase().replace(/\s+/g,"-");
-
-  const services = JSON.parse(localStorage.getItem("services") || "[]");
-  services.push({ id, name, created:new Date().toISOString() });
-  localStorage.setItem("services", JSON.stringify(services));
-  renderServices();
-}
-
-function renderServices(){
-  servicesList.innerHTML = "";
-  const services = JSON.parse(localStorage.getItem("services") || "[]");
-
-  services.forEach(s=>{
-    const div = document.createElement("div");
-    div.className = "item";
-    div.innerHTML = `
-      <strong>${s.name}</strong><br>
-      <small>${new Date(s.created).toLocaleString()}</small><br><br>
-      <button onclick="openService('${s.id}')">Open</button>
-    `;
-    servicesList.appendChild(div);
-  });
-}
-
-function openService(id){
-  currentService = id;
-  servicesPage.classList.remove("active");
-  appPage.classList.add("active");
-
-  // Store active service globally
-  localStorage.setItem("activeService", id);
-}
-
-/* ================= JPEG TITLE FIX ================= */
-window.drawDeploymentTitle = function(ctx,w){
-  ctx.font="bold 32px Arial";
-  ctx.textAlign="center";
-  ctx.fillText("DEPLOYMENT", w/2, 52);
-};
-
-/* ================= PWA ================= */
-if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("sw.js");
-}
+  /* ─── PWA ─── */
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js');
+  }
 </script>
-
 </body>
 </html>
