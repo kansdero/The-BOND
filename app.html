@@ -286,6 +286,7 @@
     }
     .agent-row:active { cursor: grabbing; }
     .agent-row.dragging { opacity: .3; }
+    /* First agent in zone = leader styling */
     .agent-row.leader {
       background: var(--leader-bg);
       border-color: var(--accent);
@@ -299,9 +300,10 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
+    /* Leader name bold + accented */
     .agent-row.leader .agent-name { font-weight: 700; color: var(--accent2); }
     .agent-sub { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .agent-row.leader .agent-sub { color: var(--accent); font-weight: 700; }
+    .agent-row.leader .agent-sub { color: var(--accent); font-weight: 600; }
     .agent-acts { display: flex; gap: 2px; flex-shrink: 0; }
     .ico {
       background: none; border: none;
@@ -455,7 +457,7 @@
     <div class="pool-list" id="poolList"></div>
   </div>
 
-  <div class="sec-label">Zones</div>
+  <div class="sec-label">Zones — first agent in each zone is automatically the leader</div>
   <div class="zones-grid" id="zonesGrid"></div>
 
   <div class="briefing-wrap">
@@ -515,8 +517,8 @@ let S = {
   zones: [],        // [{id,name,custom}]
   active: [],       // zone ids
   agents: [],       // [{id,name,callsign,contact}]
-  za: {},           // {zoneId:[{agentId,leader}]}
-  briefing: '',     // briefing notes
+  za: {},           // {zoneId:[{agentId}]}  — no leader flag, position 0 = leader
+  briefing: '',
 };
 
 let dragging     = null; // {id, from:'pool'|zoneId}
@@ -529,20 +531,17 @@ let editingId    = null;
   const sid = p.get('service') || localStorage.getItem('activeService') || 'default';
   S.serviceId = sid;
 
-  // Load service name from bond_services
   try {
     const svcs = JSON.parse(localStorage.getItem('bond_services') || '[]');
     const svc  = svcs.find(s => s.id === sid);
     if(svc){ S.serviceName = svc.name; document.getElementById('svcName').textContent = svc.name.toUpperCase(); }
   } catch(e){}
 
-  // Load saved deployment state
   try {
     const saved = localStorage.getItem('deploy_' + sid);
     if(saved) Object.assign(S, JSON.parse(saved));
   } catch(e){}
 
-  // Always guarantee preset zones exist (merge, never lose them)
   PRESET_ZONES.forEach(n=>{
     const id = n.toLowerCase();
     if(!S.zones.find(z=>z.id===id)){
@@ -550,7 +549,6 @@ let editingId    = null;
     }
   });
 
-  // Guarantee za exists for every zone
   S.zones.forEach(z=>{ if(!S.za[z.id]) S.za[z.id]=[]; });
 
   applyTheme();
@@ -636,9 +634,7 @@ function importCSV(input){
       added++;
     });
     input.value='';
-    save();
-    renderPool();
-    renderZones();
+    save(); renderPool(); renderZones();
     document.getElementById('poolList').scrollIntoView({behavior:'smooth',block:'nearest'});
     toast(added > 0 ? '✓ '+added+' agents loaded'+(skipped?' · '+skipped+' skipped':'') : 'No new agents — check file format');
   };
@@ -658,7 +654,7 @@ function addAgent(){
   save(); renderPool();
 }
 
-function usedIds(){ const s=new Set(); Object.values(S.za).forEach(arr=>arr.forEach(a=>s.add(a.agentId))); return s; }
+function usedIds(){ const s=new Set(); Object.values(S.za).forEach(arr=>arr.forEach(id=>s.add(id))); return s; }
 
 function renderPool(){
   const el   = document.getElementById('poolList');
@@ -668,9 +664,10 @@ function renderPool(){
   if(!free.length){ el.innerHTML='<div style="color:var(--muted);font-size:12px;padding:6px">All agents deployed ✓</div>'; return; }
   el.innerHTML='';
   free.forEach(a=>{
+    const label = [a.callsign, a.contact].filter(Boolean).join(' · ') || a.name;
     const t = document.createElement('div');
     t.className='pool-tag'; t.draggable=true; t.dataset.id=a.id;
-    t.innerHTML=`<span>👤</span><span>${a.name}${a.callsign?' · '+a.callsign:''}</span><span class="rm" onclick="rmAgent('${a.id}')">✕</span>`;
+    t.innerHTML=`<span>👤</span><span>${label}</span><span class="rm" onclick="rmAgent('${a.id}')">✕</span>`;
     t.addEventListener('dragstart',e=>{ dragging={id:a.id,from:'pool'}; draggingRow=null; t.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; });
     t.addEventListener('dragend',()=>t.classList.remove('dragging'));
     el.appendChild(t);
@@ -678,7 +675,7 @@ function renderPool(){
 }
 
 function rmAgent(id){
-  Object.keys(S.za).forEach(z=>{ S.za[z]=S.za[z].filter(a=>a.agentId!==id); });
+  Object.keys(S.za).forEach(z=>{ S.za[z]=S.za[z].filter(aid=>aid!==id); });
   S.agents=S.agents.filter(a=>a.id!==id);
   save(); renderPool(); renderZones();
 }
@@ -699,12 +696,12 @@ function renderZones(){
 
     const body = document.createElement('div');
     body.className='zone-body'; body.id='zb-'+zid;
-    const zas = S.za[zid]||[];
-    if(!zas.length){ body.innerHTML='<div class="drop-hint">Drop agents here</div>'; }
+    const agentIds = S.za[zid]||[];
+    if(!agentIds.length){ body.innerHTML='<div class="drop-hint">Drop agents here · first slot = leader</div>'; }
     else {
-      zas.forEach((za,idx)=>{
-        const ag = S.agents.find(a=>a.id===za.agentId); if(!ag) return;
-        body.appendChild(makeAgentRow(ag,za,zid,idx));
+      agentIds.forEach((agentId, idx)=>{
+        const ag = S.agents.find(a=>a.id===agentId); if(!ag) return;
+        body.appendChild(makeAgentRow(ag, zid, idx, idx===0));
       });
     }
     card.appendChild(body);
@@ -716,20 +713,23 @@ function renderZones(){
   });
 }
 
-function makeAgentRow(ag,za,zid,idx){
+function makeAgentRow(ag, zid, idx, isLeader){
   const row = document.createElement('div');
-  row.className='agent-row'+(za.leader?' leader':'');
+  row.className='agent-row'+(isLeader?' leader':'');
   row.draggable=true;
-  const sub=[ag.callsign,ag.contact].filter(Boolean).join(' · ');
+
+  // Display: callsign + contact only
+  const displayMain = ag.callsign || ag.name;
+  const displaySub  = ag.contact || '';
+
   row.innerHTML=`
     <span class="drag-handle">⠿</span>
     <div class="agent-info">
-      <div class="agent-name">${ag.name}</div>
-      ${sub?`<div class="agent-sub"> · ${sub}</div>`:''}
+      <div class="agent-name">${displayMain}</div>
+      ${displaySub?`<div class="agent-sub"> · ${displaySub}</div>`:''}
     </div>
-    ${za.leader?'<span class="ldr-badge">Lead</span>':''}
+    ${isLeader?'<span class="ldr-badge">Lead</span>':''}
     <div class="agent-acts">
-      <button class="ico" title="${za.leader?'Unset leader':'Set leader'}" onclick="setLeader('${zid}','${ag.id}')">${za.leader?'★':'☆'}</button>
       <button class="ico" title="Edit" onclick="openEdit('${ag.id}')">✎</button>
       <button class="ico" title="Return to pool" onclick="returnPool('${zid}','${ag.id}')">↩</button>
     </div>
@@ -748,19 +748,17 @@ function makeAgentRow(ag,za,zid,idx){
 function drop(zid, insertIdx){
   if(dragging){
     const {id,from} = dragging;
-    if(from!=='pool') S.za[from]=S.za[from].filter(a=>a.agentId!==id);
+    if(from!=='pool') S.za[from]=S.za[from].filter(aid=>aid!==id);
     if(!S.za[zid]) S.za[zid]=[];
-    if(!S.za[zid].find(a=>a.agentId===id)){
-      const entry={agentId:id,leader:false};
-      insertIdx!==undefined ? S.za[zid].splice(insertIdx,0,entry) : S.za[zid].push(entry);
+    if(!S.za[zid].includes(id)){
+      insertIdx!==undefined ? S.za[zid].splice(insertIdx,0,id) : S.za[zid].push(id);
     }
     dragging=null;
   } else if(draggingRow && draggingRow.zoneId!==zid){
     const {agentId,zoneId:src}=draggingRow;
-    const entry=S.za[src].find(a=>a.agentId===agentId)||{agentId,leader:false};
-    S.za[src]=S.za[src].filter(a=>a.agentId!==agentId);
+    S.za[src]=S.za[src].filter(aid=>aid!==agentId);
     if(!S.za[zid]) S.za[zid]=[];
-    S.za[zid].push({...entry});
+    S.za[zid].push(agentId);
     draggingRow=null;
   }
   save(); renderPool(); renderZones();
@@ -772,19 +770,8 @@ function reorder(zid,from,to){
 }
 
 function returnPool(zid,agentId){
-  S.za[zid]=S.za[zid].filter(a=>a.agentId!==agentId);
+  S.za[zid]=S.za[zid].filter(aid=>aid!==agentId);
   save(); renderPool(); renderZones();
-}
-
-function setLeader(zid,agentId){
-  const za=S.za[zid].find(a=>a.agentId===agentId); if(!za) return;
-  const was=za.leader;
-  S.za[zid].forEach(a=>a.leader=false);
-  za.leader=!was;
-  if(za.leader){
-    S.za[zid]=[za,...S.za[zid].filter(a=>a.agentId!==agentId)];
-  }
-  save(); renderZones();
 }
 
 /* ─── EDIT MODAL ─── */
@@ -806,31 +793,50 @@ function saveEdit(){
   save(); closeEdit(); renderPool(); renderZones();
 }
 
-/* ─── EXPORT UTILS ─── */
+/* ─── EXPORT HTML ─── */
 function buildExportHTML(){
   if(!S.active.length){ toast('No active zones to export'); return null; }
   const isA = S.theme==='amber';
   const acc  = isA ? '#FFD700' : '#4a9e18';
   const ldrBg= isA ? '#fffbea' : '#e8f5e9';
-  const ldrBd= isA ? '#FFD700' : '#4a9e18';
+  const ldrBd= isA ? '#e6b800' : '#4a9e18';
   const date = new Date().toLocaleDateString('en-ZA',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
 
   const zonesH = S.active.map(zid=>{
     const zone=S.zones.find(z=>z.id===zid); if(!zone) return '';
-    const agents=(S.za[zid]||[]);
-    const agentsHtml = agents.map((za,idx)=>{
-      const a=S.agents.find(x=>x.id===za.agentId); if(!a) return '';
-      const sub=[a.callsign,a.contact].filter(Boolean).join(' · ');
-      return `<div style="padding:18px;border-radius:8px;margin-bottom:12px;background:${za.leader?ldrBg:'#f9f9f9'};border:1.5px solid ${za.leader?ldrBd:'#e8e8e8'};">
-        <div style="font-size:24px;font-weight:${za.leader?'700':'600'};color:${za.leader?acc:'#1a1a1a'};font-family:'Quicksand',sans-serif;line-height:1.3;">${sub}${za.leader?' ★':''}</div>
+    const agentIds=(S.za[zid]||[]);
+
+    const agentsHtml = agentIds.map((agentId, idx)=>{
+      const a=S.agents.find(x=>x.id===agentId); if(!a) return '';
+      const isLeader = idx === 0;
+
+      // Export shows only callsign + contact
+      const mainText = a.callsign || a.name;
+      const subText  = a.contact  || '';
+
+      return `<div style="
+        padding:16px 20px;
+        border-radius:8px;
+        margin-bottom:10px;
+        background:${isLeader ? ldrBg : '#f9f9f9'};
+        border:2px solid ${isLeader ? ldrBd : '#e8e8e8'};
+        display:flex;
+        align-items:center;
+        gap:12px;
+      ">
+        ${isLeader ? `<span style="font-size:11px;letter-spacing:1px;text-transform:uppercase;background:${acc};color:#000;padding:3px 8px;border-radius:3px;font-weight:700;font-family:'Quicksand',sans-serif;white-space:nowrap;">Lead</span>` : ''}
+        <div style="flex:1;">
+          <div style="font-family:'Quicksand',sans-serif;font-size:${isLeader?'26px':'23px'};font-weight:${isLeader?'700':'600'};color:${isLeader?'#000':'#1a1a1a'};line-height:1.2;">${mainText}</div>
+          ${subText ? `<div style="font-family:'Quicksand',sans-serif;font-size:16px;color:${isLeader?'#555':'#888'};margin-top:3px;font-weight:${isLeader?'600':'500'};">${subText}</div>` : ''}
+        </div>
       </div>`;
     }).join('');
-    
-    return `<div style="background:#fff;border-radius:12px;overflow:hidden;border:2.5px solid ${acc};box-shadow:0 4px 12px rgba(0,0,0,.1);padding:18px;">
+
+    return `<div style="background:#fff;border-radius:12px;overflow:hidden;border:2.5px solid ${acc};box-shadow:0 4px 12px rgba(0,0,0,.08);padding:18px;">
       <div style="background:${acc};padding:14px 18px;border-radius:8px;margin-bottom:14px;">
-        <span style="font-family:'Quicksand',sans-serif;font-size:36px;letter-spacing:2px;color:#000;font-weight:600;">${zone.name}</span>
+        <span style="font-family:'Quicksand',sans-serif;font-size:36px;letter-spacing:2px;color:#000;font-weight:700;">${zone.name}</span>
       </div>
-      <div style="display:grid;grid-template-columns:1fr;gap:12px;">${agentsHtml||'<div style="font-size:14px;color:#ccc;padding:10px;">No agents assigned</div>'}</div>
+      ${agentsHtml||'<div style="font-size:14px;color:#ccc;padding:10px;font-family:Quicksand,sans-serif;">No agents assigned</div>'}
     </div>`;
   }).join('');
 
@@ -873,7 +879,6 @@ function openPreview(){
   document.getElementById('previewContent').innerHTML = html;
   document.getElementById('previewModal').classList.add('open');
 }
-
 function closePreview(){
   document.getElementById('previewModal').classList.remove('open');
   document.getElementById('previewContent').innerHTML = '';
@@ -883,10 +888,8 @@ function closePreview(){
 function exportJPEG(){
   const html = buildExportHTML();
   if(!html) return;
-  
   document.getElementById('exportWrap').innerHTML = html;
   toast('Generating…');
-  
   setTimeout(()=>{
     html2canvas(document.getElementById('exportWrap').firstElementChild,{
       scale:2, useCORS:true, backgroundColor:'#ffffff', logging:false
