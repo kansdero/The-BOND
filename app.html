@@ -819,13 +819,13 @@ function buildExportHTML(){
           background:${isLeader?ldrBg:'#f9f9f9'};
           border:1.5px solid ${isLeader?ldrBd:'#e8e8e8'};
         ">
-          <div style="
-            font-size:15px;
-            font-weight:700;
-            color:${isLeader?acc:'#1a1a1a'};
-          ">
-            ${a.callsign || ''}${a.contact ? ' · ' + a.contact : ''}
-          </div>
+        <div style="
+  font-size:15px;
+  font-weight:700;
+  color:#000;  /* ✅ FORCE BLACK */
+">
+  ${a.callsign || ''}${a.contact ? ' · ' + a.contact : ''}
+</div>
 
           ${isLeader ? `
             <div style="
@@ -918,19 +918,30 @@ function buildExportHTML(){
       ${briefingHtml}
 
       <!-- ✅ FOOTER -->
-      <div style="
-        border-top:3px solid ${acc};
-        padding-top:16px;
-        display:flex;
-        justify-content:space-between;
-      ">
-        <span style="font-size:26px;font-weight:700;">THE BOND</span>
-        <span style="color:#aaa;font-size:12px;">
-          Confidential · Internal Use Only
-        </span>
-      </div>
+    <div style="
+  border-top:3px solid ${acc};
+  padding-top:18px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+">
+  <span style="
+    font-size:32px;
+    font-weight:800;
+    color:#000;
+    letter-spacing:1px;
+  ">
+    THE BOND
+  </span>
 
-    </div>
+  <span style="
+    color:#000;
+    font-size:16px;
+    font-weight:600;
+  ">
+    Confidential · Internal Use Only
+  </span>
+</div>
   `;
 }
 
