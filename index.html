@@ -363,13 +363,7 @@
 
     <div class="detail-actions">
       <button class="btn btn-primary" onclick="openDeployment()">
-        📋 Create / Edit Deployment
-      </button>
-      <button class="btn btn-secondary" onclick="previewDeployment()">
-        👁 Preview Deployment
-      </button>
-      <button class="btn btn-outline" onclick="downloadDeployment()">
-        ⬇ Download as Image
+        📋 Open Deployment Editor
       </button>
       <button class="btn btn-danger" onclick="deleteService()">
         🗑 Delete Service
@@ -475,19 +469,7 @@
     showPage('appPage');
   }
 
-  function previewDeployment() {
-    // Opens app.html in preview/read-only mode (app.html can read ?mode=preview)
-    document.getElementById('appTitle').textContent = 'PREVIEW';
-    document.getElementById('appFrame').src = 'app.html?service=' + currentService.id + '&mode=preview';
-    showPage('appPage');
-  }
 
-  function downloadDeployment() {
-    // Delegates to app.html — the iframe triggers its own download/export logic
-    document.getElementById('appTitle').textContent = 'DOWNLOAD';
-    document.getElementById('appFrame').src = 'app.html?service=' + currentService.id + '&mode=download';
-    showPage('appPage');
-  }
 
   function deleteService() {
     if (!confirm(`Delete "${currentService.name}"? This cannot be undone.`)) return;
