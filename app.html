@@ -360,7 +360,11 @@
   <div class="zone-picker" id="zonePicker"></div>
 
   <div class="pool-wrap">
-    <div class="sec-label" style="margin-bottom:10px">Agent Pool</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div class="sec-label" style="margin:0">Agent Pool</div>
+      <button class="btn-sm ghost" style="font-size:12px;padding:5px 12px;" onclick="document.getElementById('csvInput').click()">⬆ Import CSV</button>
+      <input type="file" id="csvInput" accept=".csv,.txt" style="display:none" onchange="importCSV(this)">
+    </div>
     <div class="add-row">
       <input id="inName"     placeholder="Name"      onkeydown="if(event.key==='Enter') document.getElementById('inCS').focus()">
       <input id="inCS"       placeholder="Call sign" onkeydown="if(event.key==='Enter') document.getElementById('inCon').focus()">
@@ -501,6 +505,37 @@ function addCustomZone(){
   S.zones.push({id,name,custom:true});
   S.active.push(id); S.za[id]=[];
   save(); closeZM(); renderPicker(); renderZones();
+}
+
+/* ─── IMPORT CSV ─── */
+function importCSV(input){
+  const file = input.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    const lines = e.target.result.split(/
+?
+/).map(l=>l.trim()).filter(Boolean);
+    let added = 0, skipped = 0;
+    lines.forEach(line=>{
+      // Skip header row if it looks like one
+      if(/^name[,	]/i.test(line)){ skipped++; return; }
+      // Support comma or tab separated
+      const parts = line.split(/,|	/).map(p=>p.trim().replace(/^["']|["']$/g,''));
+      const name = parts[0]||''; if(!name){ skipped++; return; }
+      const callsign = parts[1]||'';
+      const contact  = parts[2]||'';
+      // Skip duplicates by name+callsign
+      const dup = S.agents.find(a=>a.name.toLowerCase()===name.toLowerCase() && a.callsign.toLowerCase()===callsign.toLowerCase());
+      if(dup){ skipped++; return; }
+      const id = 'a'+Date.now()+Math.random().toString(36).slice(2,5);
+      S.agents.push({id,name,callsign,contact});
+      added++;
+    });
+    input.value=''; // reset so same file can be re-imported
+    save(); renderPool();
+    toast(added + ' agents imported' + (skipped?' ('+skipped+' skipped)':''));
+  };
+  reader.readAsText(file);
 }
 
 /* ─── AGENTS ─── */
