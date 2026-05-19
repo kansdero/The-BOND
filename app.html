@@ -494,13 +494,17 @@
 </div>
 
 <!-- Preview modal -->
-<div id="previewModal" onclick="if(event.target===this)closePreview()">
-  <div class="preview-content" id="previewContent"></div>
-  <div class="preview-controls">
-    <button onclick="closePreview()">✕ Close</button>
-    <button onclick="exportJPEG()">⬇ Download</button>
+
+<div id="assignModal" class="overlay" onclick="if(event.target===this)closeAssign()">
+  <div class="modal">
+    <h3>Select Zone</h3>
+    <div id="assignOptions" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
+    <div class="modal-acts" style="margin-top:12px;">
+      <button class="btn-sm ghost" onclick="closeAssign()">Cancel</button>
+    </div>
   </div>
 </div>
+
 
 <div id="exportWrap"></div>
 <div id="toast"></div>
@@ -667,7 +671,13 @@ function renderPool(){
     const label = [a.callsign, a.contact].filter(Boolean).join(' · ') || a.name;
     const t = document.createElement('div');
     t.className='pool-tag'; t.draggable=true; t.dataset.id=a.id;
-    t.innerHTML=`<span>👤</span><span>${label}</span><span class="rm" onclick="rmAgent('${a.id}')">✕</span>`;
+   t.innerHTML=`
+  <span>👤</span>
+  <span onclick="assignToZone('${a.id}')" style="cursor:pointer;">
+    ${a.name}${a.callsign?' · '+a.callsign:''}
+  </span>
+  <span class="rm" onclick="rmAgent('${a.id}')">✕</span>
+`;
     t.addEventListener('dragstart',e=>{ dragging={id:a.id,from:'pool'}; draggingRow=null; t.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; });
     t.addEventListener('dragend',()=>t.classList.remove('dragging'));
     el.appendChild(t);
@@ -978,10 +988,50 @@ function exportJPEG(){
 }
 
 /* ─── TOAST ─── */
-function toast(msg){
-  const el=document.getElementById('toast');
-  el.textContent=msg; el.classList.add('show');
-  setTimeout(()=>el.classList.remove('show'),2800);
+/* ✅ MOBILE ZONE ASSIGNMENT (TAP) */
+let assignAgentId = null;
+
+function assignToZone(agentId){
+  assignAgentId = agentId;
+
+  const box = document.getElementById('assignOptions');
+  box.innerHTML = '';
+
+  S.active.forEach(zid=>{
+    const z = S.zones.find(x=>x.id===zid);
+    if(!z) return;
+
+    const btn = document.createElement('button');
+    btn.className = 'btn-sm';
+    btn.textContent = z.name;
+    btn.onclick = ()=>confirmAssign(zid);
+
+    box.appendChild(btn);
+  });
+
+  document.getElementById('assignModal').classList.add('open');
+}
+
+function confirmAssign(zid){
+  if(!assignAgentId) return;
+
+  if(!S.za[zid]) S.za[zid] = [];
+
+  if(!S.za[zid].find(a=>a.agentId===assignAgentId)){
+    S.za[zid].push({agentId:assignAgentId, leader:false});
+  }
+
+  assignAgentId = null;
+
+  save();
+  renderPool();
+  renderZones();
+
+  closeAssign();
+}
+
+function closeAssign(){
+  document.getElementById('assignModal').classList.remove('open');
 }
 </script>
 </body>
