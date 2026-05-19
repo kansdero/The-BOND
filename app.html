@@ -433,19 +433,29 @@ let editingId    = null;
   const sid = p.get('service') || localStorage.getItem('activeService') || 'default';
   S.serviceId = sid;
 
-  const svcs = JSON.parse(localStorage.getItem('bond_services') || '[]');
-  const svc  = svcs.find(s => s.id === sid);
-  if(svc){ S.serviceName = svc.name; document.getElementById('svcName').textContent = svc.name.toUpperCase(); }
+  // Load service name from bond_services
+  try {
+    const svcs = JSON.parse(localStorage.getItem('bond_services') || '[]');
+    const svc  = svcs.find(s => s.id === sid);
+    if(svc){ S.serviceName = svc.name; document.getElementById('svcName').textContent = svc.name.toUpperCase(); }
+  } catch(e){}
 
-  const saved = localStorage.getItem('deploy_' + sid);
-  if(saved){
-    Object.assign(S, JSON.parse(saved));
-  } else {
-    S.zones  = PRESET_ZONES.map(n=>({id:n.toLowerCase(),name:n,custom:false}));
-    S.active = [];
-    S.agents = [];
-    S.za     = {};
-  }
+  // Load saved deployment state
+  try {
+    const saved = localStorage.getItem('deploy_' + sid);
+    if(saved) Object.assign(S, JSON.parse(saved));
+  } catch(e){}
+
+  // Always guarantee preset zones exist (merge, never lose them)
+  PRESET_ZONES.forEach(n=>{
+    const id = n.toLowerCase();
+    if(!S.zones.find(z=>z.id===id)){
+      S.zones.push({id, name:n, custom:false});
+    }
+  });
+
+  // Guarantee za exists for every zone
+  S.zones.forEach(z=>{ if(!S.za[z.id]) S.za[z.id]=[]; });
 
   applyTheme();
   renderPicker();
@@ -512,29 +522,29 @@ function importCSV(input){
   const file = input.files[0]; if(!file) return;
   const reader = new FileReader();
   reader.onload = function(e){
-    const lines = e.target.result.split(/
-?
-/).map(l=>l.trim()).filter(Boolean);
+    const text = e.target.result;
+    const lines = text.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
     let added = 0, skipped = 0;
     lines.forEach(line=>{
-      // Skip header row if it looks like one
-      if(/^name[,	]/i.test(line)){ skipped++; return; }
-      // Support comma or tab separated
-      const parts = line.split(/,|	/).map(p=>p.trim().replace(/^["']|["']$/g,''));
+      if(/^(name|agent|staff|member)[,;\t]/i.test(line)){ skipped++; return; }
+      const parts = line.split(/[,;\t]/).map(p=>p.trim().replace(/^["'\s]+|["'\s]+$/g,''));
       const name = parts[0]||''; if(!name){ skipped++; return; }
       const callsign = parts[1]||'';
       const contact  = parts[2]||'';
-      // Skip duplicates by name+callsign
-      const dup = S.agents.find(a=>a.name.toLowerCase()===name.toLowerCase() && a.callsign.toLowerCase()===callsign.toLowerCase());
+      const dup = S.agents.find(a=>a.name.toLowerCase()===name.toLowerCase());
       if(dup){ skipped++; return; }
-      const id = 'a'+Date.now()+Math.random().toString(36).slice(2,5);
+      const id = 'a'+Date.now()+'-'+Math.random().toString(36).slice(2,6);
       S.agents.push({id,name,callsign,contact});
       added++;
     });
-    input.value=''; // reset so same file can be re-imported
-    save(); renderPool();
-    toast(added + ' agents imported' + (skipped?' ('+skipped+' skipped)':''));
+    input.value='';
+    save();
+    renderPool();
+    renderZones();
+    document.getElementById('poolList').scrollIntoView({behavior:'smooth',block:'nearest'});
+    toast(added > 0 ? '✓ '+added+' agents loaded'+(skipped?' · '+skipped+' skipped':'') : 'No new agents — check file format');
   };
+  reader.onerror = function(){ toast('Could not read file'); };
   reader.readAsText(file);
 }
 
