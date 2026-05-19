@@ -792,7 +792,6 @@ function saveEdit(){
   a.contact=document.getElementById('eCon').value.trim();
   save(); closeEdit(); renderPool(); renderZones();
 }
-
 function buildExportHTML(){
   if(!S.active.length){ toast('No active zones to export'); return null; }
 
@@ -804,74 +803,78 @@ function buildExportHTML(){
   const date = new Date().toLocaleDateString('en-ZA',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
 
   const zonesH = S.active.map(zid=>{
-    const zone=S.zones.find(z=>z.id===zid); if(!zone) return '';
-    const agents=(S.za[zid]||[]);
+    const zone = S.zones.find(z=>z.id===zid); if(!zone) return '';
 
-    const agentsHtml = agents.map(za=>{
-      const a=S.agents.find(x=>x.id===za.agentId); if(!a) return '';
-      const sub=[a.callsign,a.contact].filter(Boolean).join(' · ');
+    const agents = S.za[zid] || [];
+
+    const agentsHtml = agents.map((za, idx)=>{
+      const a = S.agents.find(x=>x.id===za.agentId); if(!a) return '';
+
+      const isLeader = idx === 0; // ✅ FIRST AGENT = LEAD
 
       return `
         <div style="
           padding:14px;
           border-radius:8px;
-          background:${za.leader?ldrBg:'#f9f9f9'};
-          border:1.5px solid ${za.leader?ldrBd:'#e8e8e8'};
-          text-align:left;
+          background:${isLeader?ldrBg:'#f9f9f9'};
+          border:1.5px solid ${isLeader?ldrBd:'#e8e8e8'};
         ">
           <div style="
-            font-size:16px;
-            font-weight:${za.leader?'700':'600'};
-            color:${za.leader?acc:'#1a1a1a'};
-            font-family:'Quicksand',sans-serif;
+            font-size:15px;
+            font-weight:700;
+            color:${isLeader?acc:'#1a1a1a'};
           ">
-            ${a.name}${za.leader?' ★':''}
+            ${a.callsign || ''}${a.contact ? ' · ' + a.contact : ''}
           </div>
-          ${sub ? `
+
+          ${isLeader ? `
             <div style="
-              font-size:13px;
-              color:#777;
-              margin-top:4px;
-            ">${sub}</div>
+              margin-top:6px;
+              font-size:11px;
+              font-weight:700;
+              color:#000;
+              background:${acc};
+              display:inline-block;
+              padding:2px 6px;
+              border-radius:4px;
+            ">Lead</div>
           ` : ''}
         </div>
       `;
     }).join('');
 
     return `
-    <div style="
-      background:#fff;
-      border-radius:12px;
-      border:2.5px solid ${acc};
-      box-shadow:0 4px 12px rgba(0,0,0,.1);
-      padding:18px;
-    ">
       <div style="
-        background:${acc};
-        padding:14px 18px;
-        border-radius:8px;
-        margin-bottom:14px;
+        background:#fff;
+        border-radius:12px;
+        border:2.5px solid ${acc};
+        padding:18px;
       ">
-        <span style="
-          font-family:'Quicksand';
-          font-size:32px;
-          color:#000;
-          font-weight:700;
+        <div style="
+          background:${acc};
+          padding:14px 18px;
+          border-radius:8px;
+          margin-bottom:14px;
         ">
-          ${zone.name}
-        </span>
-      </div>
+          <span style="
+            font-size:32px;
+            color:#000;
+            font-weight:700;
+          ">
+            ${zone.name}
+          </span>
+        </div>
 
-      <!-- ✅ THIS IS THE KEY FIX -->
-      <div style="
-        display:grid;
-        grid-template-columns:repeat(3, 1fr); /* change to 4 or 5 or 6 if you want */
-        gap:12px;
-      ">
-        ${agentsHtml || '<div style="color:#ccc;">No agents assigned</div>'}
-      </div>
+        <!-- ✅ GRID: BREAKS INTO ROWS -->
+        <div style="
+          display:grid;
+          grid-template-columns:repeat(3, 1fr); /* change to 4/5/6 if needed */
+          gap:12px;
+        ">
+          ${agentsHtml || '<div style="color:#ccc;">No agents</div>'}
+        </div>
 
-    </div>
+      </div>
     `;
   }).join('');
 
@@ -881,32 +884,50 @@ function buildExportHTML(){
       <ul style="padding-left:20px;font-size:15px;color:#333;">
         ${S.briefing.split('\n').filter(l=>l.trim()).map(line=>`<li>${line}</li>`).join('')}
       </ul>
-    </div>` : '';
+    </div>
+  ` : '';
 
   return `
-    <div style="width:1600px;background:#fff;padding:56px;font-family:'Quicksand'">
+    <div style="width:1600px;background:#fff;padding:56px;">
 
-      <div style="background:${acc};padding:40px;border-radius:18px;margin-bottom:40px;display:flex;justify-content:space-between;">
-        <div>
-          <div style="font-size:40px;font-weight:700;color:#000">${S.serviceName.toUpperCase()}</div>
-          <div style="font-size:24px;color:#333">DEPLOYMENT</div>
+      <!-- ✅ HEADER (CLEANED — DATE SIDE REMOVED) -->
+      <div style="
+        background:${acc};
+        border-radius:18px;
+        padding:40px;
+        margin-bottom:40px;
+      ">
+        <div style="font-size:40px;font-weight:700;color:#000;">
+          ${S.serviceName.toUpperCase()}
         </div>
-        <div style="text-align:right;">
-          <div>${date}</div>
-          <div>General Parking</div>
-          <div>Security Department</div>
+        <div style="font-size:24px;color:#333;">
+          DEPLOYMENT
         </div>
       </div>
 
-      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:24px;margin-bottom:40px;">
+      <!-- ✅ ZONES -->
+      <div style="
+        display:grid;
+        grid-template-columns:repeat(2,1fr);
+        gap:24px;
+        margin-bottom:40px;
+      ">
         ${zonesH}
       </div>
 
       ${briefingHtml}
 
-      <div style="border-top:3px solid ${acc};padding-top:16px;display:flex;justify-content:space-between;">
+      <!-- ✅ FOOTER -->
+      <div style="
+        border-top:3px solid ${acc};
+        padding-top:16px;
+        display:flex;
+        justify-content:space-between;
+      ">
         <span style="font-size:26px;font-weight:700;">THE BOND</span>
-        <span style="color:#aaa;font-size:12px;">Confidential · Internal Use Only</span>
+        <span style="color:#aaa;font-size:12px;">
+          Confidential · Internal Use Only
+        </span>
       </div>
 
     </div>
