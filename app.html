@@ -793,83 +793,124 @@ function saveEdit(){
   save(); closeEdit(); renderPool(); renderZones();
 }
 
-/* ─── EXPORT HTML ─── */
 function buildExportHTML(){
   if(!S.active.length){ toast('No active zones to export'); return null; }
+
   const isA = S.theme==='amber';
   const acc  = isA ? '#FFD700' : '#4a9e18';
   const ldrBg= isA ? '#fffbea' : '#e8f5e9';
-  const ldrBd= isA ? '#e6b800' : '#4a9e18';
+  const ldrBd= isA ? '#FFD700' : '#4a9e18';
+
   const date = new Date().toLocaleDateString('en-ZA',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
 
   const zonesH = S.active.map(zid=>{
     const zone=S.zones.find(z=>z.id===zid); if(!zone) return '';
-    const agentIds=(S.za[zid]||[]);
+    const agents=(S.za[zid]||[]);
 
-    const agentsHtml = agentIds.map((agentId, idx)=>{
-      const a=S.agents.find(x=>x.id===agentId); if(!a) return '';
-      const isLeader = idx === 0;
+    const agentsHtml = agents.map(za=>{
+      const a=S.agents.find(x=>x.id===za.agentId); if(!a) return '';
+      const sub=[a.callsign,a.contact].filter(Boolean).join(' · ');
 
-      // Export shows only callsign + contact
-      const mainText = a.callsign || a.name;
-      const subText  = a.contact  || '';
-
-      return `<div style="
-        padding:16px 20px;
-        border-radius:8px;
-        margin-bottom:10px;
-        background:${isLeader ? ldrBg : '#f9f9f9'};
-        border:2px solid ${isLeader ? ldrBd : '#e8e8e8'};
-        display:flex;
-        align-items:center;
-        gap:12px;
-      ">
-        ${isLeader ? `<span style="font-size:11px;letter-spacing:1px;text-transform:uppercase;background:${acc};color:#000;padding:3px 8px;border-radius:3px;font-weight:700;font-family:'Quicksand',sans-serif;white-space:nowrap;">Lead</span>` : ''}
-        <div style="flex:1;">
-          <div style="font-family:'Quicksand',sans-serif;font-size:${isLeader?'26px':'23px'};font-weight:${isLeader?'700':'600'};color:${isLeader?'#000':'#1a1a1a'};line-height:1.2;">${mainText}</div>
-          ${subText ? `<div style="font-family:'Quicksand',sans-serif;font-size:16px;color:${isLeader?'#555':'#888'};margin-top:3px;font-weight:${isLeader?'600':'500'};">${subText}</div>` : ''}
+      return `
+        <div style="
+          padding:14px;
+          border-radius:8px;
+          background:${za.leader?ldrBg:'#f9f9f9'};
+          border:1.5px solid ${za.leader?ldrBd:'#e8e8e8'};
+          text-align:left;
+        ">
+          <div style="
+            font-size:16px;
+            font-weight:${za.leader?'700':'600'};
+            color:${za.leader?acc:'#1a1a1a'};
+            font-family:'Quicksand',sans-serif;
+          ">
+            ${a.name}${za.leader?' ★':''}
+          </div>
+          ${sub ? `
+            <div style="
+              font-size:13px;
+              color:#777;
+              margin-top:4px;
+            ">${sub}</div>
+          ` : ''}
         </div>
-      </div>`;
+      `;
     }).join('');
 
-    return `<div style="background:#fff;border-radius:12px;overflow:hidden;border:2.5px solid ${acc};box-shadow:0 4px 12px rgba(0,0,0,.08);padding:18px;">
-      <div style="background:${acc};padding:14px 18px;border-radius:8px;margin-bottom:14px;">
-        <span style="font-family:'Quicksand',sans-serif;font-size:36px;letter-spacing:2px;color:#000;font-weight:700;">${zone.name}</span>
+    return `
+    <div style="
+      background:#fff;
+      border-radius:12px;
+      border:2.5px solid ${acc};
+      box-shadow:0 4px 12px rgba(0,0,0,.1);
+      padding:18px;
+    ">
+      <div style="
+        background:${acc};
+        padding:14px 18px;
+        border-radius:8px;
+        margin-bottom:14px;
+      ">
+        <span style="
+          font-family:'Quicksand';
+          font-size:32px;
+          color:#000;
+          font-weight:700;
+        ">
+          ${zone.name}
+        </span>
       </div>
-      ${agentsHtml||'<div style="font-size:14px;color:#ccc;padding:10px;font-family:Quicksand,sans-serif;">No agents assigned</div>'}
-    </div>`;
+
+      <!-- ✅ THIS IS THE KEY FIX -->
+      <div style="
+        display:grid;
+        grid-template-columns:repeat(3, 1fr); /* change to 4 or 5 or 6 if you want */
+        gap:12px;
+      ">
+        ${agentsHtml || '<div style="color:#ccc;">No agents assigned</div>'}
+      </div>
+
+    </div>
+    `;
   }).join('');
 
   const briefingHtml = S.briefing ? `
     <div style="background:#fafafa;border-radius:10px;padding:20px;margin-bottom:20px;border-left:5px solid ${acc};">
-      <div style="font-family:'Quicksand',sans-serif;font-size:18px;font-weight:700;color:${acc};margin-bottom:12px;">BRIEFING NOTES</div>
-      <ul style="margin:0;padding-left:24px;font-family:'Quicksand',sans-serif;font-size:16px;line-height:1.8;color:#333;list-style:disc;">
-        ${S.briefing.split('\n').filter(l=>l.trim()).map(line=>`<li style="margin-bottom:8px;">${line.trim()}</li>`).join('')}
+      <div style="font-size:18px;font-weight:700;color:${acc};margin-bottom:12px;">BRIEFING NOTES</div>
+      <ul style="padding-left:20px;font-size:15px;color:#333;">
+        ${S.briefing.split('\n').filter(l=>l.trim()).map(line=>`<li>${line}</li>`).join('')}
       </ul>
-    </div>
-  ` : '';
+    </div>` : '';
 
   return `
-    <div style="width:1600px;background:#fff;font-family:'Quicksand',sans-serif;padding:56px;">
-      <div style="background:${acc};border-radius:18px;padding:40px;margin-bottom:40px;display:flex;align-items:center;justify-content:space-between;">
+    <div style="width:1600px;background:#fff;padding:56px;font-family:'Quicksand'">
+
+      <div style="background:${acc};padding:40px;border-radius:18px;margin-bottom:40px;display:flex;justify-content:space-between;">
         <div>
-          <div style="font-family:'Quicksand',sans-serif;font-size:42px;font-weight:700;color:#000;line-height:1;margin-bottom:8px;">${S.serviceName.toUpperCase()}</div>
-          <div style="font-size:26px;font-weight:400;color:rgba(0,0,0,.75);letter-spacing:1px;">DEPLOYMENT</div>
+          <div style="font-size:40px;font-weight:700;color:#000">${S.serviceName.toUpperCase()}</div>
+          <div style="font-size:24px;color:#333">DEPLOYMENT</div>
         </div>
-        <div style="text-align:right;color:rgba(0,0,0,.7);font-size:16px;line-height:2;font-family:'Quicksand',sans-serif;">
-          <div style="font-size:14px;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;font-weight:700;">Date</div>
-          <div style="font-weight:600;font-size:18px;margin-bottom:8px;">${date}</div>
-          <div style="font-size:15px;font-weight:600;opacity:.85;">General Parking</div>
-          <div style="font-size:15px;font-weight:600;opacity:.85;">Security Department</div>
+        <div style="text-align:right;">
+          <div>${date}</div>
+          <div>General Parking</div>
+          <div>Security Department</div>
         </div>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:24px;margin-bottom:40px;">${zonesH}</div>
+
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:24px;margin-bottom:40px;">
+        ${zonesH}
+      </div>
+
       ${briefingHtml}
-      <div style="margin-top:32px;padding-top:18px;border-top:3.5px solid ${acc};display:flex;align-items:center;justify-content:space-between;">
-        <span style="font-family:'Quicksand',sans-serif;font-size:28px;letter-spacing:3px;color:#000;font-weight:700;">THE BOND</span>
-        <span style="font-size:13px;color:#bbb;font-family:'Quicksand',sans-serif;">Confidential · Internal Use Only</span>
+
+      <div style="border-top:3px solid ${acc};padding-top:16px;display:flex;justify-content:space-between;">
+        <span style="font-size:26px;font-weight:700;">THE BOND</span>
+        <span style="color:#aaa;font-size:12px;">Confidential · Internal Use Only</span>
       </div>
-    </div>`;
+
+    </div>
+  `;
 }
 
 /* ─── PREVIEW ─── */
