@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -391,12 +392,19 @@
     #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
     /* MODALS */
-    .overlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,.8); z-index: 50;
-      align-items: flex-end; justify-content: center;
-    }
-    .overlay.open { display: flex; }
+   .overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.8);
+  z-index: 50;
+  pointer-events: none; /* ✅ IMPORTANT */
+}
+
+.overlay.open {
+  display: flex;
+  pointer-events: auto; /* ✅ only active when open */
+}
     .modal {
       background: var(--surface);
       border-radius: 16px 16px 0 0;
@@ -510,6 +518,7 @@
 <div id="toast"></div>
 
 <script>
+  document.body.addEventListener('click', () => {});  // ✅ ADD HERE
 /* ─── PRESETS ─── */
 const PRESET_ZONES = ['Haven','Lakeside','Ducati','Tally','Support'];
 
@@ -1009,7 +1018,9 @@ function assignToZone(agentId){
     box.appendChild(btn);
   });
 
-  document.getElementById('assignModal').classList.add('open');
+ const m = document.getElementById('assignModal');
+m.style.display = 'flex';
+m.classList.add('open');
 }
 
 function confirmAssign(zid){
@@ -1031,8 +1042,13 @@ function confirmAssign(zid){
 }
 
 function closeAssign(){
-  document.getElementById('assignModal').classList.remove('open');
+  const m = document.getElementById('assignModal');
+  m.classList.remove('open');
+
+  // ✅ FORCE FULL RESET
+  m.style.display = 'none';
 }
+
 </script>
 </body>
 </html>
