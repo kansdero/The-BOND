@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -287,7 +286,6 @@
     }
     .agent-row:active { cursor: grabbing; }
     .agent-row.dragging { opacity: .3; }
-    /* First agent in zone = leader styling */
     .agent-row.leader {
       background: var(--leader-bg);
       border-color: var(--accent);
@@ -301,7 +299,6 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    /* Leader name bold + accented */
     .agent-row.leader .agent-name { font-weight: 700; color: var(--accent2); }
     .agent-sub { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .agent-row.leader .agent-sub { color: var(--accent); font-weight: 600; }
@@ -335,29 +332,26 @@
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,.9);
+      background: rgba(0,0,0,.92);
       z-index: 100;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
       overflow: auto;
       padding: 20px;
     }
-    #previewModal.open {
-      display: flex;
-    }
-    .preview-content {
+    #previewModal.open { display: flex; }
+    .preview-inner {
       background: #fff;
       border-radius: 8px;
-      overflow: auto;
-      max-height: 90vh;
-      max-width: 90vw;
+      overflow: hidden;
+      margin: 60px auto 40px;
+      width: 100%;
+      max-width: 1200px;
     }
-    .preview-content > div {
-      width: 1600px;
-    }
+    #previewContent { width: 100%; }
     .preview-controls {
       position: fixed;
-      top: 20px;
+      top: 14px;
       right: 20px;
       display: flex;
       gap: 10px;
@@ -375,9 +369,12 @@
       cursor: pointer;
       transition: opacity .2s;
     }
-    .preview-controls button:hover {
-      opacity: .85;
+    .preview-controls button.ghost-btn {
+      background: #222;
+      color: #eee;
+      border: 1px solid #444;
     }
+    .preview-controls button:hover { opacity: .85; }
 
     /* TOAST */
     #toast {
@@ -392,19 +389,18 @@
     #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
     /* MODALS */
-   .overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.8);
-  z-index: 50;
-  pointer-events: none; /* ✅ IMPORTANT */
-}
-
-.overlay.open {
-  display: flex;
-  pointer-events: auto; /* ✅ only active when open */
-}
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.8);
+      z-index: 50;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .overlay.open {
+      display: flex;
+    }
     .modal {
       background: var(--surface);
       border-radius: 16px 16px 0 0;
@@ -501,8 +497,7 @@
   </div>
 </div>
 
-<!-- Preview modal -->
-
+<!-- Assign modal -->
 <div id="assignModal" class="overlay" onclick="if(event.target===this)closeAssign()">
   <div class="modal">
     <h3>Select Zone</h3>
@@ -513,12 +508,21 @@
   </div>
 </div>
 
+<!-- Preview modal -->
+<div id="previewModal" onclick="if(event.target===this)closePreview()">
+  <div class="preview-controls">
+    <button class="ghost-btn" onclick="closePreview()">✕ Close</button>
+    <button onclick="exportJPEG()">⬇ JPEG</button>
+  </div>
+  <div class="preview-inner">
+    <div id="previewContent"></div>
+  </div>
+</div>
 
 <div id="exportWrap"></div>
 <div id="toast"></div>
 
 <script>
-  document.body.addEventListener('click', () => {});  // ✅ ADD HERE
 /* ─── PRESETS ─── */
 const PRESET_ZONES = ['Haven','Lakeside','Ducati','Tally','Support'];
 
@@ -527,16 +531,16 @@ let S = {
   theme: 'amber',
   serviceName: '',
   serviceId: '',
-  zones: [],        // [{id,name,custom}]
-  active: [],       // zone ids
-  agents: [],       // [{id,name,callsign,contact}]
-  za: {},           // {zoneId:[{agentId}]}  — no leader flag, position 0 = leader
+  zones: [],
+  active: [],
+  agents: [],
+  za: {},
   briefing: '',
 };
 
-let dragging     = null; // {id, from:'pool'|zoneId}
-let draggingRow  = null; // {agentId,zoneId,idx}
-let editingId    = null;
+let dragging    = null;
+let draggingRow = null;
+let editingId   = null;
 
 /* ─── BOOT ─── */
 (function(){
@@ -667,7 +671,12 @@ function addAgent(){
   save(); renderPool();
 }
 
-function usedIds(){ const s=new Set(); Object.values(S.za).forEach(arr=>arr.forEach(id=>s.add(id))); return s; }
+/* Returns the set of agent IDs currently assigned to any zone */
+function usedIds(){
+  const s=new Set();
+  Object.values(S.za).forEach(arr=>arr.forEach(id=>s.add(id)));
+  return s;
+}
 
 function renderPool(){
   const el   = document.getElementById('poolList');
@@ -677,16 +686,15 @@ function renderPool(){
   if(!free.length){ el.innerHTML='<div style="color:var(--muted);font-size:12px;padding:6px">All agents deployed ✓</div>'; return; }
   el.innerHTML='';
   free.forEach(a=>{
-    const label = [a.callsign, a.contact].filter(Boolean).join(' · ') || a.name;
     const t = document.createElement('div');
     t.className='pool-tag'; t.draggable=true; t.dataset.id=a.id;
-   t.innerHTML=`
-  <span>👤</span>
-  <span onclick="assignToZone('${a.id}')" style="cursor:pointer;">
-    ${a.name}${a.callsign?' · '+a.callsign:''}
-  </span>
-  <span class="rm" onclick="rmAgent('${a.id}')">✕</span>
-`;
+    t.innerHTML=`
+      <span>👤</span>
+      <span onclick="assignToZone('${a.id}')" style="cursor:pointer;">
+        ${a.name}${a.callsign?' · '+a.callsign:''}
+      </span>
+      <span class="rm" onclick="rmAgent('${a.id}')">✕</span>
+    `;
     t.addEventListener('dragstart',e=>{ dragging={id:a.id,from:'pool'}; draggingRow=null; t.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; });
     t.addEventListener('dragend',()=>t.classList.remove('dragging'));
     el.appendChild(t);
@@ -737,7 +745,6 @@ function makeAgentRow(ag, zid, idx, isLeader){
   row.className='agent-row'+(isLeader?' leader':'');
   row.draggable=true;
 
-  // Display: callsign + contact only
   const displayMain = ag.callsign || ag.name;
   const displaySub  = ag.contact || '';
 
@@ -811,26 +818,24 @@ function saveEdit(){
   a.contact=document.getElementById('eCon').value.trim();
   save(); closeEdit(); renderPool(); renderZones();
 }
+
+/* ─── BUILD EXPORT HTML ─── */
 function buildExportHTML(){
   if(!S.active.length){ toast('No active zones to export'); return null; }
 
-  const isA = S.theme==='amber';
+  const isA  = S.theme==='amber';
   const acc  = isA ? '#FFD700' : '#4a9e18';
   const ldrBg= isA ? '#fffbea' : '#e8f5e9';
   const ldrBd= isA ? '#FFD700' : '#4a9e18';
 
-  const date = new Date().toLocaleDateString('en-ZA',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-
   const zonesH = S.active.map(zid=>{
     const zone = S.zones.find(z=>z.id===zid); if(!zone) return '';
+    // S.za[zid] is an array of plain agent ID strings
+    const agentIds = S.za[zid] || [];
 
-    const agents = S.za[zid] || [];
-
-    const agentsHtml = agents.map((za, idx)=>{
-      const a = S.agents.find(x=>x.id===za.agentId); if(!a) return '';
-
-      const isLeader = idx === 0; // ✅ FIRST AGENT = LEAD
-
+    const agentsHtml = agentIds.map((agentId, idx)=>{
+      const a = S.agents.find(x=>x.id===agentId); if(!a) return '';
+      const isLeader = idx === 0;
       return `
         <div style="
           padding:14px;
@@ -838,24 +843,13 @@ function buildExportHTML(){
           background:${isLeader?ldrBg:'#f9f9f9'};
           border:1.5px solid ${isLeader?ldrBd:'#e8e8e8'};
         ">
-        <div style="
-  font-size:15px;
-  font-weight:700;
-  color:#000;  /* ✅ FORCE BLACK */
-">
-  ${a.callsign || ''}${a.contact ? ' · ' + a.contact : ''}
-</div>
-
+          <div style="font-size:15px;font-weight:700;color:#000;">
+            ${a.callsign || a.name}${a.contact ? ' · ' + a.contact : ''}
+          </div>
           ${isLeader ? `
             <div style="
-              margin-top:6px;
-              font-size:11px;
-              font-weight:700;
-              color:#000;
-              background:${acc};
-              display:inline-block;
-              padding:2px 6px;
-              border-radius:4px;
+              margin-top:6px;font-size:11px;font-weight:700;color:#000;
+              background:${acc};display:inline-block;padding:2px 6px;border-radius:4px;
             ">Lead</div>
           ` : ''}
         </div>
@@ -863,36 +857,13 @@ function buildExportHTML(){
     }).join('');
 
     return `
-      <div style="
-        background:#fff;
-        border-radius:12px;
-        border:2.5px solid ${acc};
-        padding:18px;
-      ">
-        <div style="
-          background:${acc};
-          padding:14px 18px;
-          border-radius:8px;
-          margin-bottom:14px;
-        ">
-          <span style="
-            font-size:32px;
-            color:#000;
-            font-weight:700;
-          ">
-            ${zone.name}
-          </span>
+      <div style="background:#fff;border-radius:12px;border:2.5px solid ${acc};padding:18px;">
+        <div style="background:${acc};padding:14px 18px;border-radius:8px;margin-bottom:14px;">
+          <span style="font-size:32px;color:#000;font-weight:700;">${zone.name}</span>
         </div>
-
-        <!-- ✅ GRID: BREAKS INTO ROWS -->
-        <div style="
-          display:grid;
-          grid-template-columns:repeat(3, 1fr); /* change to 4/5/6 if needed */
-          gap:12px;
-        ">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
           ${agentsHtml || '<div style="color:#ccc;">No agents</div>'}
         </div>
-
       </div>
     `;
   }).join('');
@@ -907,60 +878,20 @@ function buildExportHTML(){
   ` : '';
 
   return `
-    <div style="width:1600px;background:#fff;padding:56px;">
-
-      <!-- ✅ HEADER (CLEANED — DATE SIDE REMOVED) -->
-      <div style="
-        background:${acc};
-        border-radius:18px;
-        padding:40px;
-        margin-bottom:40px;
-      ">
-        <div style="font-size:40px;font-weight:700;color:#000;">
-          ${S.serviceName.toUpperCase()}
-        </div>
-        <div style="font-size:24px;color:#333;">
-          DEPLOYMENT
-        </div>
+    <div style="width:1600px;background:#fff;padding:56px;font-family:'Quicksand',sans-serif;">
+      <div style="background:${acc};border-radius:18px;padding:40px;margin-bottom:40px;">
+        <div style="font-size:40px;font-weight:700;color:#000;">${(S.serviceName||'DEPLOYMENT').toUpperCase()}</div>
+        <div style="font-size:24px;color:#333;">DEPLOYMENT</div>
       </div>
-
-      <!-- ✅ ZONES -->
-      <div style="
-        display:grid;
-        grid-template-columns:repeat(2,1fr);
-        gap:24px;
-        margin-bottom:40px;
-      ">
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:24px;margin-bottom:40px;">
         ${zonesH}
       </div>
-
       ${briefingHtml}
-
-      <!-- ✅ FOOTER -->
-    <div style="
-  border-top:3px solid ${acc};
-  padding-top:18px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-">
-  <span style="
-    font-size:32px;
-    font-weight:800;
-    color:#000;
-    letter-spacing:1px;
-  ">
-    THE BOND
-  </span>
-
-  <span style="
-    color:#000;
-    font-size:16px;
-    font-weight:600;
-  ">
-    Confidential · Internal Use Only
-  </span>
-</div>
+      <div style="border-top:3px solid ${acc};padding-top:18px;display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:32px;font-weight:800;color:#000;letter-spacing:1px;">THE BOND</span>
+        <span style="color:#000;font-size:16px;font-weight:600;">Confidential · Internal Use Only</span>
+      </div>
+    </div>
   `;
 }
 
@@ -969,6 +900,15 @@ function openPreview(){
   const html = buildExportHTML();
   if(!html) return;
   document.getElementById('previewContent').innerHTML = html;
+  // Scale inner content to fit viewport width
+  const inner = document.querySelector('#previewContent > div');
+  if(inner){
+    const vw = Math.min(window.innerWidth, 1200);
+    const scale = vw / 1600;
+    inner.style.transform = `scale(${scale})`;
+    inner.style.transformOrigin = 'top left';
+    inner.parentElement.style.height = Math.round(inner.offsetHeight * scale) + 'px';
+  }
   document.getElementById('previewModal').classList.add('open');
 }
 function closePreview(){
@@ -997,58 +937,49 @@ function exportJPEG(){
 }
 
 /* ─── TOAST ─── */
-/* ✅ MOBILE ZONE ASSIGNMENT (TAP) */
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),2800);
+}
+
+/* ─── MOBILE ZONE ASSIGNMENT (TAP) ─── */
 let assignAgentId = null;
 
 function assignToZone(agentId){
   assignAgentId = agentId;
-
   const box = document.getElementById('assignOptions');
   box.innerHTML = '';
-
-  S.active.forEach(zid=>{
-    const z = S.zones.find(x=>x.id===zid);
-    if(!z) return;
-
-    const btn = document.createElement('button');
-    btn.className = 'btn-sm';
-    btn.textContent = z.name;
-    btn.onclick = ()=>confirmAssign(zid);
-
-    box.appendChild(btn);
-  });
-
- const m = document.getElementById('assignModal');
-m.style.display = 'flex';
-m.classList.add('open');
+  if(!S.active.length){
+    box.innerHTML = '<div style="color:var(--muted);font-size:13px;">No active zones — activate a zone first.</div>';
+  } else {
+    S.active.forEach(zid=>{
+      const z = S.zones.find(x=>x.id===zid); if(!z) return;
+      const btn = document.createElement('button');
+      btn.className = 'btn-sm';
+      btn.textContent = z.name;
+      btn.onclick = ()=>confirmAssign(zid);
+      box.appendChild(btn);
+    });
+  }
+  document.getElementById('assignModal').classList.add('open');
 }
 
 function confirmAssign(zid){
   if(!assignAgentId) return;
-
   if(!S.za[zid]) S.za[zid] = [];
-
-  if(!S.za[zid].find(a=>a.agentId===assignAgentId)){
-    S.za[zid].push({agentId:assignAgentId, leader:false});
+  if(!S.za[zid].includes(assignAgentId)){
+    S.za[zid].push(assignAgentId);
   }
-
   assignAgentId = null;
-
-  save();
-  renderPool();
-  renderZones();
-
+  save(); renderPool(); renderZones();
   closeAssign();
 }
 
 function closeAssign(){
-  const m = document.getElementById('assignModal');
-  m.classList.remove('open');
-
-  // ✅ FORCE FULL RESET
-  m.style.display = 'none';
+  document.getElementById('assignModal').classList.remove('open');
+  assignAgentId = null;
 }
-
 </script>
 </body>
 </html>
